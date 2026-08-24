@@ -19,17 +19,17 @@
 </head>
 <body>
 
-    <!-- TOP NAVBAR HEADER (MATCHING ASP.NET CORE MVC NAVBAR) -->
+    <!-- TOP NAVBAR HEADER -->
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom shadow-sm py-2">
             <div class="container-fluid px-4">
-                <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-primary" href="#">
+                <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-primary" href="/dashboard.html">
                     <img src="/images/logo.png" alt="Logo" class="rounded-circle shadow-sm" style="width: 32px; height: 32px; object-fit: cover;" />
                     <span class="fs-5 fw-extrabold text-primary">TaskManagement</span>
                 </a>
                 <div class="d-flex align-items-center gap-2 ms-auto">
-                    <a href="#" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">Login</a>
-                    <a href="#" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold">Register</a>
+                    <a href="/index.html" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">Login</a>
+                    <a href="/dashboard.html" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold">Dashboard</a>
                 </div>
             </div>
         </nav>
@@ -175,7 +175,9 @@
 
         function handleLogin(e) {
             e.preventDefault();
-            alert("Đăng nhập thành công vào Hệ thống Quản trị TaskManagement (Clean Architecture .NET 8)!");
+            const email = document.getElementById('emailInput').value;
+            localStorage.setItem('userEmail', email);
+            window.location.href = '/dashboard.html';
         }
     </script>
 </body>

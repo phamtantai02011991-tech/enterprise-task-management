@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bảng Điều Khiển - TaskManagement Enterprise SaaS</title>
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; min-height: 100vh; }
+        .sidebar { background: #0f172a; min-height: 100vh; width: 260px; color: #f8fafc; position: fixed; top: 0; left: 0; z-index: 100; }
+        .main-content { margin-left: 260px; padding: 2rem; }
+        .nav-link-custom { color: #94a3b8; padding: 0.75rem 1.25rem; border-radius: 12px; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: all 0.2s; text-decoration: none; }
+        .nav-link-custom:hover, .nav-link-custom.active { background: #1e293b; color: #38bdf8; }
+        .stat-card { background: #ffffff; border-radius: 20px; padding: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: all 0.2s; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .badge-status { font-weight: 600; padding: 0.35em 0.8em; border-radius: 9999px; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar p-3 d-flex flex-column justify-content-between">
+        <div>
+            <!-- Brand -->
+            <div class="d-flex align-items-center gap-3 px-3 py-3 mb-4 border-bottom border-secondary">
+                <img src="/images/logo.png" alt="Logo" class="rounded-3" style="width: 40px; height: 40px; object-fit: cover;" />
+                <div>
+                    <h6 class="fw-bold text-white mb-0">TaskManagement</h6>
+                    <span class="badge bg-info bg-opacity-20 text-info font-monospace text-xs">SaaS .NET 8</span>
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="d-flex flex-column gap-1">
+                <a href="#" class="nav-link-custom active"><i class="bi bi-grid-1x2-fill fs-5"></i> Bảng Điều Khiển</a>
+                <a href="#" class="nav-link-custom"><i class="bi bi-folder-fill fs-5"></i> Quản Lý Dự Án</a>
+                <a href="#" class="nav-link-custom"><i class="bi bi-check2-square fs-5"></i> Danh Sách Công Việc</a>
+                <a href="#" class="nav-link-custom"><i class="bi bi-diagram-3-fill fs-5"></i> Phòng Ban</a>
+                <a href="#" class="nav-link-custom"><i class="bi bi-people-fill fs-5"></i> Nhân Viên</a>
+                <a href="#" class="nav-link-custom"><i class="bi bi-journal-text fs-5"></i> Nhật Ký Audit Log</a>
+            </nav>
+        </div>
+
+        <!-- User Info Bottom -->
+        <div class="p-3 bg-dark bg-opacity-50 rounded-4 border border-secondary border-opacity-20">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px;" id="avatarInitial">
+                        A
+                    </div>
+                    <div>
+                        <div class="fw-bold text-white small" id="userNameDisplay">Phạm Tấn Tài (Admin)</div>
+                        <div class="text-muted text-xs" id="userEmailDisplay">admin@taskflow.com</div>
+                    </div>
+                </div>
+                <a href="/" class="btn btn-outline-danger btn-sm rounded-circle p-1" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- Top Navbar Header -->
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+            <div>
+                <h4 class="fw-extrabold text-dark mb-1">Tổng Quan Hệ Thống Enterprise SaaS</h4>
+                <p class="text-muted small mb-0">Xin chào <strong id="greetingName" class="text-primary">Phạm Tấn Tài</strong>! Hệ thống đang hoạt động bình thường.</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill d-flex align-items-center gap-2">
+                    <span class="spinner-grow spinner-grow-sm" role="status"></span>
+                    SQL SERVER CONNECTED (ONLINE)
+                </span>
+                <a href="/" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Trang Đăng Nhập
+                </a>
+            </div>
+        </div>
+
+        <!-- 4 Stat Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="text-muted fw-semibold small">Tổng Số Dự Án</span>
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2"><i class="bi bi-folder-check fs-4"></i></div>
+                    </div>
+                    <h3 class="fw-extrabold text-dark mb-1">12</h3>
+                    <span class="text-success small fw-semibold"><i class="bi bi-arrow-up-right"></i> +3 dự án mới tháng này</span>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="text-muted fw-semibold small">Công Việc Đang Thực Hiện</span>
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2"><i class="bi bi-clock-history fs-4"></i></div>
+                    </div>
+                    <h3 class="fw-extrabold text-dark mb-1">48</h3>
+                    <span class="text-warning small fw-semibold">14 công việc sắp đến hạn</span>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="text-muted fw-semibold small">Công Việc Hoàn Thành</span>
+                        <div class="bg-success bg-opacity-10 text-success rounded-3 p-2"><i class="bi bi-check-circle-fill fs-4"></i></div>
+                    </div>
+                    <h3 class="fw-extrabold text-dark mb-1">126</h3>
+                    <span class="text-success small fw-semibold"><i class="bi bi-arrow-up-right"></i> 94.2% đúng tiến độ</span>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="text-muted fw-semibold small">Nhân Viên Hệ Thống</span>
+                        <div class="bg-info bg-opacity-10 text-info rounded-3 p-2"><i class="bi bi-people-fill fs-4"></i></div>
+                    </div>
+                    <h3 class="fw-extrabold text-dark mb-1">35</h3>
+                    <span class="text-info small fw-semibold">Phân chia 5 phòng ban</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project & Task Tables -->
+        <div class="row g-4">
+            <!-- Project List -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold text-dark mb-0">Dự Án Trọng Điểm (.NET 8 Clean Arch)</h5>
+                        <span class="badge bg-light text-dark border">Cập nhật realtime</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr class="text-muted small">
+                                    <th>MÃ DỰ ÁN</th>
+                                    <th>TÊN DỰ ÁN</th>
+                                    <th>TIẾN ĐỘ</th>
+                                    <th>TRẠNG THÁI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-monospace fw-bold text-primary">PRJ-NET8-01</td>
+                                    <td class="fw-bold text-dark">Enterprise TaskManagement Platform</td>
+                                    <td style="width: 140px;">
+                                        <div class="progress rounded-pill" style="height: 8px;">
+                                            <div class="progress-bar bg-success" style="width: 85%;"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success-subtle text-success badge-status">Đang chạy</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-monospace fw-bold text-primary">PRJ-FINTECH-02</td>
+                                    <td class="fw-bold text-dark">SmartWallet Core Banking Microservice</td>
+                                    <td style="width: 140px;">
+                                        <div class="progress rounded-pill" style="height: 8px;">
+                                            <div class="progress-bar bg-primary" style="width: 95%;"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success-subtle text-success badge-status">Hoàn thành</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-monospace fw-bold text-primary">PRJ-OMNI-03</td>
+                                    <td class="fw-bold text-dark">Omni Social Automation SaaS Engine</td>
+                                    <td style="width: 140px;">
+                                        <div class="progress rounded-pill" style="height: 8px;">
+                                            <div class="progress-bar bg-warning" style="width: 60%;"></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-warning-subtle text-warning badge-status">Đang phát triển</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Audit Logs -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold text-dark mb-3">Nhật Ký Audit Logs Vừa Ghi Nhanh</h5>
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-start gap-3 p-2 rounded-3 bg-light">
+                            <div class="bg-primary text-white rounded-circle p-2 fs-6"><i class="bi bi-shield-check"></i></div>
+                            <div>
+                                <div class="fw-bold text-dark small">Phạm Tấn Tài đã xác thực tài khoản Admin</div>
+                                <div class="text-muted text-xs">Vừa xong • IP: 127.0.0.1 (System Auth)</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3 p-2 rounded-3 bg-light">
+                            <div class="bg-success text-white rounded-circle p-2 fs-6"><i class="bi bi-plus-circle-fill"></i></div>
+                            <div>
+                                <div class="fw-bold text-dark small">Tạo mới công việc: "Tích hợp Supabase DB"</div>
+                                <div class="text-muted text-xs">5 phút trước • Bởi Manager System</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3 p-2 rounded-3 bg-light">
+                            <div class="bg-info text-white rounded-circle p-2 fs-6"><i class="bi bi-arrow-repeat"></i></div>
+                            <div>
+                                <div class="fw-bold text-dark small">Cập nhật tiến độ dự án PRJ-NET8-01 lên 85%</div>
+                                <div class="text-muted text-xs">15 phút trước • Bởi Leader Dev</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userEmail = localStorage.getItem('userEmail') || 'admin@taskflow.com';
+            document.getElementById('userEmailDisplay').textContent = userEmail;
+            if (userEmail.includes('manager')) {
+                document.getElementById('userNameDisplay').textContent = 'Dept Manager';
+                document.getElementById('greetingName').textContent = 'Manager System';
+                document.getElementById('avatarInitial').textContent = 'M';
+            } else if (userEmail.includes('employee')) {
+                document.getElementById('userNameDisplay').textContent = 'Employee User';
+                document.getElementById('greetingName').textContent = 'Employee';
+                document.getElementById('avatarInitial').textContent = 'E';
+            }
+        });
+    </script>
+</body>
+</html>
