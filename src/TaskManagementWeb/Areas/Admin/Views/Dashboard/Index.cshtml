@@ -1,0 +1,390 @@
+@using TaskManagementWeb.Models.Enums
+@model TaskManagementWeb.Models.ViewModels.Admin.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Executive Dashboard";
+    ViewData["ActivePage"] = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-speedometer2 text-primary me-2"></i>Tổng Quan Hệ Thống Admin
+        </h2>
+        <p class="text-muted mb-0">Thống kê hiệu suất dự án, cơ cấu nhân sự, giám sát tiến độ và hoạt động toàn doanh nghiệp.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-area="Admin" asp-controller="Announcement" asp-action="Create" class="btn btn-outline-danger rounded-pill px-3 shadow-sm">
+            <i class="bi bi-megaphone me-1"></i> Phát Thông Báo Hệ Thống
+        </a>
+        <a asp-area="Manager" asp-controller="Project" asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Khởi Tạo Dự Án Mới
+        </a>
+    </div>
+</div>
+
+<!-- Active Announcements Banner (If any) -->
+@if (Model.ActiveAnnouncements != null && Model.ActiveAnnouncements.Any())
+{
+    @foreach (var ann in Model.ActiveAnnouncements)
+    {
+        <div class="alert @(ann.Type == "Urgent" ? "alert-danger" : ann.Type == "Warning" ? "alert-warning" : "alert-primary") alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <div class="me-3 fs-3">
+                @if (ann.Type == "Urgent")
+                {
+                    <i class="bi bi-exclamation-octagon-fill text-danger"></i>
+                }
+                else if (ann.Type == "Warning")
+                {
+                    <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                }
+                else
+                {
+                    <i class="bi bi-megaphone-fill text-primary"></i>
+                }
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2">
+                    <strong class="fw-bold">@ann.Title</strong>
+                    @if (ann.IsPinned)
+                    {
+                        <span class="badge bg-danger rounded-pill"><i class="bi bi-pin-angle-fill me-1"></i>Ghim</span>
+                    }
+                </div>
+                <div class="small mt-1">@ann.Content</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+}
+
+<!-- 6 Core KPI Stat Cards -->
+<div class="row g-3 mb-4">
+    <!-- Total Users -->
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-3 h-100 transition-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-white-50 small text-uppercase fw-semibold">Tổng Nhân Sự</span>
+                <i class="bi bi-people-fill fs-4 text-white-50"></i>
+            </div>
+            <h3 class="fw-bold mb-1">@Model.TotalUsers</h3>
+            <small class="text-white-50">@Model.TotalDepartments phòng ban</small>
+        </div>
+    </div>
+
+    <!-- Active Projects -->
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="card border-0 shadow-sm rounded-4 bg-success text-white p-3 h-100 transition-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-white-50 small text-uppercase fw-semibold">Dự Án Đang Chạy</span>
+                <i class="bi bi-lightning-charge-fill fs-4 text-white-50"></i>
+            </div>
+            <h3 class="fw-bold mb-1">@Model.ActiveProjects</h3>
+            <small class="text-white-50">/ @Model.TotalProjects tổng dự án</small>
+        </div>
+    </div>
+
+    <!-- Total Tasks -->
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="card border-0 shadow-sm rounded-4 bg-info text-white p-3 h-100 transition-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-white-50 small text-uppercase fw-semibold">Tổng Công Việc</span>
+                <i class="bi bi-list-check fs-4 text-white-50"></i>
+            </div>
+            <h3 class="fw-bold mb-1">@Model.TotalTasks</h3>
+            <small class="text-white-50">tasks toàn hệ thống</small>
+        </div>
+    </div>
+
+    <!-- Completed Tasks -->
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="card border-0 shadow-sm rounded-4 bg-teal text-white p-3 h-100 transition-card" style="background: linear-gradient(135deg, #0d9488, #14b8a6);">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-white-50 small text-uppercase fw-semibold">Đã Hoàn Thành</span>
+                <i class="bi bi-check2-circle fs-4 text-white-50"></i>
+            </div>
+            <h3 class="fw-bold mb-1">@Model.CompletedTasks</h3>
+            <small class="text-white-50">đạt chuẩn nghiệm thu</small>
+        </div>
+    </div>
+
+    <!-- Overdue Tasks -->
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="card border-0 shadow-sm rounded-4 bg-danger text-white p-3 h-100 transition-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-white-50 small text-uppercase fw-semibold">Task Quá Hạn</span>
+                <i class="bi bi-clock-history fs-4 text-white-50"></i>
+            </div>
+            <h3 class="fw-bold mb-1">@Model.OverdueTasks</h3>
+            <small class="text-white-50">cần đốc thúc xử lý</small>
+        </div>
+    </div>
+
+    <!-- Overall Completion Rate -->
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="card border-0 shadow-sm rounded-4 bg-dark text-white p-3 h-100 transition-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-white-50 small text-uppercase fw-semibold">Tỷ Lệ Hoàn Thành</span>
+                <i class="bi bi-graph-up-arrow fs-4 text-warning"></i>
+            </div>
+            <h3 class="fw-bold mb-1 text-warning">@Model.OverallCompletionRate%</h3>
+            <div class="progress rounded-pill mt-1" style="height: 4px;">
+                <div class="progress-bar bg-warning" style="width: @Model.OverallCompletionRate%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Project Performance & Personnel Analytics Row -->
+<div class="row g-4 mb-4">
+    <!-- Project Performance Table -->
+    <div class="col-xl-8">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-kanban text-primary me-2"></i>Hiệu Suất Dự Án Trọng Điểm
+                    </h5>
+                    <small class="text-muted">Theo dõi tiến độ hoàn thành và tình trạng thời hạn của các dự án gần nhất.</small>
+                </div>
+                <a asp-area="Manager" asp-controller="Project" asp-action="Index" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                    Xem tất cả dự án
+                </a>
+            </div>
+            <div class="card-body px-4">
+                @if (Model.ProjectPerformanceList != null && Model.ProjectPerformanceList.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Mã / Tên Dự Án</th>
+                                    <th>Trưởng Dự Án</th>
+                                    <th>Tiến Độ (%)</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Ưu Tiên</th>
+                                    <th class="text-end pe-3">Hạn Chót</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.ProjectPerformanceList)
+                                {
+                                    <tr>
+                                        <td class="ps-3">
+                                            <a asp-area="Manager" asp-controller="Project" asp-action="Details" asp-route-id="@p.Id" class="text-dark fw-semibold text-decoration-none hover-primary">
+                                                [@p.ProjectCode] @p.Title
+                                            </a>
+                                            <div class="small text-muted">@p.CompletedTasks / @p.TotalTasks công việc</div>
+                                        </td>
+                                        <td class="small fw-medium">@p.ManagerName</td>
+                                        <td style="min-width: 130px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="progress flex-grow-1 rounded-pill" style="height: 8px;">
+                                                    <div class="progress-bar @(p.Progress == 100 ? "bg-success" : p.Progress > 50 ? "bg-primary" : "bg-warning")" style="width: @p.Progress%"></div>
+                                                </div>
+                                                <span class="small fw-bold">@p.Progress%</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @switch (p.Status)
+                                            {
+                                                case ProjectStatus.Active:
+                                                    <span class="badge bg-success rounded-pill">Active</span>
+                                                    break;
+                                                case ProjectStatus.Planning:
+                                                    <span class="badge bg-info text-white rounded-pill">Planning</span>
+                                                    break;
+                                                case ProjectStatus.OnHold:
+                                                    <span class="badge bg-warning text-dark rounded-pill">On Hold</span>
+                                                    break;
+                                                case ProjectStatus.Completed:
+                                                    <span class="badge bg-primary rounded-pill">Completed</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary rounded-pill">Cancelled</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (p.Priority == ProjectPriority.Urgent)
+                                            {
+                                                <span class="badge bg-danger rounded-pill">Khẩn</span>
+                                            }
+                                            else if (p.Priority == ProjectPriority.High)
+                                            {
+                                                <span class="badge bg-warning text-dark rounded-pill">Cao</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-dark border">@p.Priority</span>
+                                            }
+                                        </td>
+                                        <td class="text-end pe-3 small">
+                                            @if (p.IsOverdue)
+                                            {
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                                                    @p.EndDate.ToString("dd/MM") (Quá hạn)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">@p.EndDate.ToString("dd/MM/yyyy")</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4 mb-0">Chưa có dữ liệu dự án.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Personnel & Role Distribution -->
+    <div class="col-xl-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-pie-chart-fill text-info me-2"></i>Cơ Cấu Nhân Sự
+                </h5>
+                <small class="text-muted">Phân bố người dùng theo vai trò & phòng ban.</small>
+            </div>
+            <div class="card-body px-4">
+                <!-- Role Breakdown -->
+                <h6 class="fw-semibold text-secondary small text-uppercase mb-3">Theo Vai Trò (Roles)</h6>
+                <div class="mb-4">
+                    @foreach (var role in Model.RoleUserCounts)
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center small mb-1">
+                                <span class="fw-semibold text-dark">
+                                    <i class="bi bi-shield-check text-primary me-1"></i>@role.RoleName
+                                </span>
+                                <span><strong>@role.UserCount</strong> nhân sự (@role.Percentage%)</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 6px;">
+                                <div class="progress-bar @(role.RoleName == "Admin" ? "bg-danger" : role.RoleName == "Manager" ? "bg-warning" : "bg-primary")" style="width: @role.Percentage%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Department Breakdown -->
+                <h6 class="fw-semibold text-secondary small text-uppercase mb-3">Theo Phòng Ban (Departments)</h6>
+                <ul class="list-group list-group-flush small">
+                    @foreach (var dept in Model.DepartmentUserCounts)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0">
+                            <span class="text-secondary"><i class="bi bi-building me-2 text-muted"></i>@dept.DepartmentName</span>
+                            <span class="badge bg-light text-dark border rounded-pill px-2">@dept.UserCount</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Registered Users & Live Audit Log Feed -->
+<div class="row g-4">
+    <!-- Recent Registered Users -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-person-plus text-success me-2"></i>Nhân Sự Mới Đăng Ký
+                </h5>
+                <a asp-area="Admin" asp-controller="User" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Xem tất cả</a>
+            </div>
+            <div class="card-body px-4">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Họ Tên</th>
+                                <th>Email</th>
+                                <th>Vai Trò</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.RecentUsers)
+                            {
+                                <tr>
+                                    <td class="fw-semibold small">@user.FullName</td>
+                                    <td class="small text-muted">@user.Email</td>
+                                    <td>
+                                        <span class="badge @(user.RoleName == "Admin" ? "bg-danger" : user.RoleName == "Manager" ? "bg-warning text-dark" : "bg-primary") rounded-pill small">
+                                            @user.RoleName
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Audit Activity Feed -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-activity text-danger me-2"></i>Nhật Ký Hoạt Động (Live Audit Stream)
+                </h5>
+                <a asp-area="Admin" asp-controller="AuditLog" asp-action="Index" class="btn btn-sm btn-outline-danger rounded-pill px-3">Toàn bộ Logs</a>
+            </div>
+            <div class="card-body px-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Thời Gian</th>
+                                <th>Người Thực Hiện</th>
+                                <th>Hành Động</th>
+                                <th>Chi Tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in Model.RecentAuditLogs)
+                            {
+                                <tr>
+                                    <td class="text-muted small">@log.Timestamp.ToString("dd/MM HH:mm")</td>
+                                    <td class="fw-semibold small text-dark">@log.UserName</td>
+                                    <td>
+                                        <span class="badge @(log.Action == "CREATE" ? "bg-success" : log.Action == "UPDATE" ? "bg-primary" : log.Action == "DELETE" ? "bg-danger" : "bg-secondary") rounded-pill">
+                                            @log.Action
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted text-truncate" style="max-width: 250px;" title="@log.Details">
+                                        @log.Details
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.transition-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.transition-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+}
+.hover-primary:hover {
+    color: #0d6efd !important;
+}
+</style>

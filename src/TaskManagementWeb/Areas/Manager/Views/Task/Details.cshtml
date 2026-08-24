@@ -1,0 +1,69 @@
+@model TaskManagementWeb.Models.Entities.TaskItem
+
+@{
+    ViewData["Title"] = "Chi tiết Công việc";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Chi tiết Task: @Model.Title</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-info-circle me-1"></i> Thông tin chung</div>
+                <div class="card-body">
+                    <p><strong>Mô tả:</strong> @Model.Description</p>
+                    <p><strong>Độ ưu tiên:</strong> @Model.Priority</p>
+                    <p><strong>Trạng thái:</strong> @Model.Status</p>
+                    <p><strong>Hạn chót (Deadline):</strong> @Model.Deadline.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Dự án thuộc về:</strong> @Model.Project?.Title</p>
+                    <p><strong>Người được giao:</strong> <span class="text-primary">@(Model.AssignedUser?.FullName ?? "Chưa phân công")</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-clock me-1"></i> Nhật ký thời gian làm việc (Time Logs)</div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                __('Nhân sự')
+                                <th>Số giờ</th>
+                                <th>Ngày log</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.TimeLogs != null && Model.TimeLogs.Any())
+                            {
+                                foreach (var log in Model.TimeLogs)
+                                {
+                                    <tr>
+                                        <td>@log.User?.FullName</td>
+                                        <td>@log.HoursSpent giờ</td>
+                                        <td>@log.DateLogged.ToString("dd/MM/yyyy")</td>
+                                        <td>@log.Description</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-muted text-center">Chưa có nhật ký thời gian nào.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Chỉnh sửa</a>
+        <a asp-action="Index" asp-route-projectId="@Model.ProjectId" class="btn btn-secondary">Quay lại danh sách</a>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+@model TaskManagementWeb.Models.Entities.TaskItem
+
+@{
+    ViewData["Title"] = "Xóa Task";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Xóa Công việc</h1>
+    <h3 class="text-danger">Bạn có chắc chắn muốn xóa task này không?</h3>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-2">Tiêu đề:</dt>
+                <dd class="col-sm-10">@Model.Title</dd>
+                
+                <dt class="col-sm-2">Mô tả:</dt>
+                <dd class="col-sm-10">@Model.Description</dd>
+                
+                <dt class="col-sm-2">Ưu tiên:</dt>
+                <dd class="col-sm-10">@Model.Priority</dd>
+
+                <dt class="col-sm-2">Deadline:</dt>
+                <dd class="col-sm-10">@Model.Deadline.ToString("dd/MM/yyyy")</dd>
+            </dl>
+            
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">Xác nhận Xóa</button>
+                <a asp-action="Index" asp-route-projectId="@Model.ProjectId" class="btn btn-secondary">Hủy</a>
+            </form>
+        </div>
+    </div>
+</div>

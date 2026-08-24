@@ -1,0 +1,139 @@
+@using TaskManagementWeb.Models.Enums
+@model TaskManagementWeb.ViewModels.Manager.ProjectCreateUpdateViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Dự án";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-pencil-square text-warning me-2"></i>Chỉnh sửa: @Model.Title
+            </h2>
+            <p class="text-muted mb-0">Cập nhật thông tin dự án, thời hạn, trạng thái và trưởng dự án.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill px-4">
+                <i class="bi bi-eye me-1"></i> Xem chi tiết
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="CreatedByUserId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- General Information -->
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-info-circle me-2"></i>Thông tin cơ bản
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label asp-for="ProjectCode" class="form-label fw-semibold">Mã Dự Án <span class="text-danger">*</span></label>
+                                <input asp-for="ProjectCode" class="form-control" required />
+                                <span asp-validation-for="ProjectCode" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-8">
+                                <label asp-for="Title" class="form-label fw-semibold">Tên Dự Án <span class="text-danger">*</span></label>
+                                <input asp-for="Title" class="form-control" required />
+                                <span asp-validation-for="Title" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label fw-semibold">Mô Tả Chi Tiết</label>
+                                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Schedule, Status & Priority -->
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-calendar-check me-2"></i>Tiến độ, Trạng thái & Độ ưu tiên
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="StartDate" class="form-label fw-semibold">Ngày Bắt Đầu <span class="text-danger">*</span></label>
+                                <input asp-for="StartDate" type="date" class="form-control" required />
+                                <span asp-validation-for="StartDate" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="EndDate" class="form-label fw-semibold">Ngày Kết Thúc <span class="text-danger">*</span></label>
+                                <input asp-for="EndDate" type="date" class="form-control" required />
+                                <span asp-validation-for="EndDate" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Status" class="form-label fw-semibold">Trạng Thái</label>
+                                <select asp-for="Status" asp-items="Html.GetEnumSelectList<ProjectStatus>()" class="form-select"></select>
+                                <span asp-validation-for="Status" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Priority" class="form-label fw-semibold">Mức Độ Ưu Tiên</label>
+                                <select asp-for="Priority" asp-items="Html.GetEnumSelectList<ProjectPriority>()" class="form-select"></select>
+                                <span asp-validation-for="Priority" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Progress" class="form-label fw-semibold">Tiến Độ (%)</label>
+                                <div class="input-group">
+                                    <input asp-for="Progress" type="number" min="0" max="100" class="form-control" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <span asp-validation-for="Progress" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Manager Assignment -->
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-person-gear me-2"></i>Trưởng dự án (Project Manager)
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <label asp-for="ManagerId" class="form-label fw-semibold">Chỉ Định Trưởng Dự Án</label>
+                                <select asp-for="ManagerId" asp-items="Model.AvailableManagers" class="form-select">
+                                    <option value="">-- Chọn Trưởng Dự Án --</option>
+                                </select>
+                                <span asp-validation-for="ManagerId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-light rounded-pill px-4">Hủy</a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i> Lưu Thay Đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

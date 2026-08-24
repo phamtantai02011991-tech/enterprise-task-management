@@ -1,0 +1,47 @@
+@model IEnumerable<PretestWDA.Models.tbEmployee>
+
+@{
+    ViewData["Title"] = "ViewEmployeeList";
+}
+
+<div class="container mt-4">
+    <p>
+        <a asp-action="AddNewEmployee" style="color: blue; text-decoration: underline;">Create Employee</a>
+    </p>
+
+    <div style="border: 1px solid #777; padding: 15px; width: 100%; max-width: 650px; background-color: #fff;">
+        <table class="table table-borderless m-0">
+            <thead>
+                <tr>
+                    <th style="font-weight: bold; width: 30%;">EmployeeName</th>
+                    <th style="font-weight: bold; width: 25%;">Address</th>
+                    <th style="font-weight: bold; width: 30%;">Email</th>
+                    <th style="width: 15%;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.EmpName</td>
+                            <td>@item.EmpAddress</td>
+                            <td>@item.EmpEmail</td>
+                            <td>
+                                <a asp-action="EditOrDeleteEmployee" asp-route-id="@item.EmpID" style="color: purple; text-decoration: underline;">View Details</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-muted">No employees found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-2 text-muted small">Figure 1. ViewEmployeeList page</div>
+</div>

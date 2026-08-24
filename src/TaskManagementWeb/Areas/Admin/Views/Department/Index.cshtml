@@ -1,0 +1,93 @@
+@model TaskManagementWeb.Models.ViewModels.Admin.DepartmentListViewModel
+@{
+    ViewData["Title"] = "Quản Lý Phòng Ban";
+    ViewData["ActivePage"] = "Departments";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Quản Lý Phòng Ban</h3>
+        <p class="text-muted mb-0">Danh sách các phòng ban tổ chức, mã phòng ban và số lượng nhân sự thuộc từng phòng.</p>
+    </div>
+    <a asp-area="Admin" asp-controller="Department" asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Thêm Phòng Ban Mới
+    </a>
+</div>
+
+<!-- Search Bar -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="get" asp-area="Admin" asp-controller="Department" asp-action="Index" class="row g-3 align-items-center">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="searchKey" value="@Model.SearchKey" class="form-control bg-light border-start-0" placeholder="Nhập tên phòng ban hoặc mã phòng ban..." />
+                </div>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-dark w-100 rounded-3">Tìm kiếm</button>
+                <a asp-area="Admin" asp-controller="Department" asp-action="Index" class="btn btn-outline-secondary rounded-3" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Department Cards / Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã Phòng Ban</th>
+                        <th>Tên Phòng Ban</th>
+                        <th>Mô Tả</th>
+                        <th>Số Nhân Sự</th>
+                        <th class="text-end pe-4">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Departments.Any())
+                    {
+                        @foreach (var dept in Model.Departments)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="badge bg-secondary font-monospace px-3 py-2 fs-7">@dept.Code</span>
+                                </td>
+                                <td class="fw-bold text-dark">@dept.Name</td>
+                                <td class="text-muted">@(string.IsNullOrEmpty(dept.Description) ? "Không có mô tả" : dept.Description)</td>
+                                <td>
+                                    <span class="badge bg-primary rounded-pill px-3 py-1">@dept.MemberCount nhân sự</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex gap-2">
+                                        <a asp-area="Admin" asp-controller="Department" asp-action="Edit" asp-route-id="@dept.Id" class="btn btn-sm btn-outline-primary rounded-3" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <form asp-area="Admin" asp-controller="Department" asp-action="Delete" asp-route-id="@dept.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phòng ban này?');" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Xóa phòng ban">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-building-exclamation fs-1 d-block mb-2"></i>
+                                Không tìm thấy phòng ban nào.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

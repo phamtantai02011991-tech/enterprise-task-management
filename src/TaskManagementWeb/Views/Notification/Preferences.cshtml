@@ -1,0 +1,109 @@
+@using TaskManagementWeb.Models.Entities
+@model NotificationPreference
+
+@{
+    ViewData["Title"] = "Cài Đặt Nhận Thông Báo";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-sliders text-primary me-2"></i>Cài Đặt Tùy Chọn Thông Báo
+            </h2>
+            <p class="text-muted mb-0">Tùy chỉnh các loại cảnh báo và thông báo bạn muốn nhận trong hệ thống.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Preferences" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="UserId" />
+
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-bell-fill me-2"></i>Thông Báo Trong Ứng Dụng (In-App)
+                        </h5>
+
+                        <div class="d-flex flex-column gap-3 mb-4">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                <div>
+                                    <div class="fw-semibold text-dark">Khi được phân công công việc (Task Assigned)</div>
+                                    <small class="text-muted">Nhận thông báo khi Quản lý hoặc đồng nghiệp giao task mới cho bạn.</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input fs-5" type="checkbox" asp-for="InAppOnTaskAssign" />
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                <div>
+                                    <div class="fw-semibold text-dark">Khi được thêm vào dự án mới (Project Added)</div>
+                                    <small class="text-muted">Nhận thông báo khi bạn được đưa vào danh sách thành viên dự án.</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input fs-5" type="checkbox" asp-for="InAppOnProjectAdded" />
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                <div>
+                                    <div class="fw-semibold text-dark">Cảnh báo thời hạn công việc (Task Deadline Alerts)</div>
+                                    <small class="text-muted">Cảnh báo nhắc nhở khi công việc sắp đến hạn hoặc bị quá hạn.</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input fs-5" type="checkbox" asp-for="InAppOnDeadline" />
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                <div>
+                                    <div class="fw-semibold text-dark">Khi công việc hoàn tất (Task Completed)</div>
+                                    <small class="text-muted">Nhận thông báo cập nhật khi thành viên trong nhóm hoàn thành công việc.</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input fs-5" type="checkbox" asp-for="InAppOnTaskCompleted" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-envelope-at me-2"></i>Thông Báo Qua Email & Cảnh Báo Hệ Thống
+                        </h5>
+
+                        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3 mb-4">
+                            <div>
+                                <div class="fw-semibold text-dark">Bật nhận thông báo qua Email</div>
+                                <small class="text-muted">Gửi email tóm tắt các công việc quan trọng định kỳ.</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input fs-5" type="checkbox" asp-for="EmailAlertsEnabled" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a asp-action="Index" class="btn btn-light rounded-pill px-4">Hủy</a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i> Lưu Tùy Chọn
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

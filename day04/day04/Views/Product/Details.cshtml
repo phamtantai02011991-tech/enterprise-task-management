@@ -1,0 +1,38 @@
+@model day04.Models.Product
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container mt-4">
+    <h2>Product Details</h2>
+    <hr />
+
+    <div class="card col-md-6">
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <div class="text-center mb-3">
+                    <img src="@Model.ImagePath" width="150" class="img-thumbnail" />
+                </div>
+            }
+            <dl class="row">
+                <dt class="col-sm-4">ID</dt>
+                <dd class="col-sm-8">@Model.Id</dd>
+
+                <dt class="col-sm-4">Name</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
+
+                <dt class="col-sm-4">Category</dt>
+                <dd class="col-sm-8">@Model.Category</dd>
+
+                <dt class="col-sm-4">Price</dt>
+                <dd class="col-sm-8">@Model.Price.ToString("N0") VND</dd>
+
+                <dt class="col-sm-4">Quantity</dt>
+                <dd class="col-sm-8">@Model.Quantity</dd>
+            </dl>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>

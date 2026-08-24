@@ -1,0 +1,63 @@
+@model IEnumerable<TaskManagementWeb.Models.Entities.TimeLog>
+
+@{
+    ViewData["Title"] = "Báo cáo Thời gian làm việc";
+    int? projectId = ViewBag.ProjectId as int?;
+    double totalHours = ViewBag.TotalHours != null ? (double)ViewBag.TotalHours : 0;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Báo cáo Nhật ký Thời gian (Time Logs)</h1>
+    
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">Tổng số giờ làm việc</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="fs-4 fw-bold">@totalHours giờ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i> Danh sách log thời gian nhân sự
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Nhân sự</th>
+                        <th>Công việc (Task)</th>
+                        <th>Dự án</th>
+                        <th>Số giờ</th>
+                        <th>Ngày log</th>
+                        <th>Mô tả công việc</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>@(item.User?.FullName ?? "N/A")</td>
+                            <td>@(item.TaskItem?.Title ?? "N/A")</td>
+                            <td>@(item.TaskItem?.Project?.Title ?? "N/A")</td>
+                            <td><span class="badge bg-success">@item.HoursSpent giờ</span></td>
+                            <td>@item.DateLogged.ToString("dd/MM/yyyy")</td>
+                            <td>@item.Description</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            
+            @if (projectId.HasValue)
+            {
+                <a asp-controller="Project" asp-action="Details" asp-route-id="@projectId" class="btn btn-secondary mt-3">Quay lại Dự án</a>
+            }
+        </div>
+    </div>
+</div>

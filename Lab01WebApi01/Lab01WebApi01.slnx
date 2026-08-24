@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Lab01WebApi/Lab01WebApi.csproj" />
+  <Project Path="Lab01WebClient/Lab01WebClient.csproj" />
+</Solution>

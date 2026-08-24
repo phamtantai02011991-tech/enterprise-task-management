@@ -1,0 +1,370 @@
+﻿@model TaskManagementWeb.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "DashboardTitle";
+}
+
+<!-- 1. KPI Overview (Projects, Tasks, Completed, Overdue) -->
+<div class="row g-4 mb-4 fade-up" style="animation-delay: 0.1s;">
+    <div class="col-sm-6 col-xl-3">
+        <div class="glass-card kpi-glass-card">
+            <div>
+                <span class="text-muted fw-semibold small text-uppercase">Total Projects</span>
+                <div class="kpi-value text-primary">@Model.TotalProjects</div>
+                <div class="small text-success mt-2 fw-medium">
+                    <i class="bi bi-arrow-up-short"></i> +12% this month
+                </div>
+            </div>
+            <div class="kpi-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-folder-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="glass-card kpi-glass-card">
+            <div>
+                <span class="text-muted fw-semibold small text-uppercase">Total Tasks</span>
+                <div class="kpi-value text-dark">@Model.TotalTasks</div>
+                <div class="small text-primary mt-2 fw-medium">
+                    <i class="bi bi-activity"></i> Active Tasks
+                </div>
+            </div>
+            <div class="kpi-icon-wrapper bg-info bg-opacity-10 text-info">
+                <i class="bi bi-list-task"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="glass-card kpi-glass-card">
+            <div>
+                <span class="text-muted fw-semibold small text-uppercase">Completed Tasks</span>
+                <div class="kpi-value text-success">@Model.CompletedTasks</div>
+                <div class="small text-success mt-2 fw-medium">
+                    <i class="bi bi-check-circle"></i> On Schedule
+                </div>
+            </div>
+            <div class="kpi-icon-wrapper bg-success bg-opacity-10 text-success">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="glass-card kpi-glass-card">
+            <div>
+                <span class="text-muted fw-semibold small text-uppercase">Overdue Tasks</span>
+                <div class="kpi-value text-danger">@Model.OverdueTasks</div>
+                <div class="small text-danger mt-2 fw-medium">
+                    <i class="bi bi-exclamation-triangle"></i> Action Required
+                </div>
+            </div>
+            <div class="kpi-icon-wrapper bg-danger bg-opacity-10 text-danger">
+                <i class="bi bi-exclamation-diamond-fill"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 2. Analytics Dashboard Section (Charts) -->
+<div class="row g-4 mb-4 fade-up" id="reports" style="animation-delay: 0.2s;">
+    <div class="col-lg-8">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">AnalyticsOverview</h5>
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">Real-time Data</span>
+            </div>
+            <canvas id="velocityChart" height="130"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-4">Task Status Distribution</h5>
+            <div class="d-flex justify-content-center">
+                <canvas id="statusDonutChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Drag-and-Drop Kanban Board Section -->
+<div class="glass-card p-4 mb-4 fade-up" style="animation-delay: 0.3s;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="fw-bold mb-1">Kanban Board</h5>
+            <p class="text-muted small mb-0">
+                Drag tasks between columns to update their status instantly.
+            </p>
+        </div>
+
+        @* <a href="@Url.Action("Index", "Task", new { area = "Employee" })" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            <i class="bi bi-table me-1"></i> Switch to Table View
+        </a> *@
+    </div>
+
+    <div class="kanban-board">
+        <!-- Pending Column -->
+        <div class="kanban-col">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold text-secondary">
+                    <i class="bi bi-circle me-2"></i>Pending
+                </span>
+
+                <span class="badge bg-secondary rounded-pill">
+                    @Model.RecentTasks.Count(t => t.Status == TaskManagementWeb.Models.Enums.TaskStatusEnum.Pending)
+                </span>
+            </div>
+
+            @foreach (var task in Model.RecentTasks.Where(t => t.Status == TaskManagementWeb.Models.Enums.TaskStatusEnum.Pending))
+            {
+                <div class="kanban-card">
+                    <div class="badge bg-light text-dark border mb-2">
+                        @task.ProjectTitle
+                    </div>
+
+                    <h6 class="fw-bold mb-2">@task.Title</h6>
+
+                    <div class="d-flex justify-content-between align-items-center text-muted small mt-3">
+                        <span>
+                            <i class="bi bi-calendar me-1"></i>
+                            @task.Deadline.ToString("dd/MM")
+                        </span>
+
+                        <span class="badge bg-warning text-dark">
+                            @task.Priority.ToString()
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- In Progress Column -->
+        <div class="kanban-col">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold text-primary">
+                    <i class="bi bi-clock-history me-2"></i>In Progress
+                </span>
+                <span class="badge bg-primary rounded-pill">
+                    @Model.RecentTasks.Count(t => t.Status == TaskManagementWeb.Models.Enums.TaskStatusEnum.InProgress)
+                </span>
+            </div>
+
+            @foreach (var task in Model.RecentTasks.Where(t => t.Status == TaskManagementWeb.Models.Enums.TaskStatusEnum.InProgress))
+            {
+                <div class="kanban-card">
+                    <div class="badge bg-light text-dark border mb-2">
+                        @task.ProjectTitle
+                    </div>
+
+                    <h6 class="fw-bold mb-2">@task.Title</h6>
+
+                    <div class="d-flex justify-content-between align-items-center text-muted small mt-3">
+                        <span>
+                            <i class="bi bi-person me-1"></i>@task.AssignedUserName
+                        </span>
+
+                        <span class="badge bg-danger">
+                            @task.Priority.ToString()
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Completed Column -->
+        <div class="kanban-col">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold text-success">
+                    <i class="bi bi-check-circle me-2"></i>Completed
+                </span>
+
+                <span class="badge bg-success rounded-pill">
+                    @Model.RecentTasks.Count(t => t.Status == TaskManagementWeb.Models.Enums.TaskStatusEnum.Completed)
+                </span>
+            </div>
+
+            @foreach (var task in Model.RecentTasks.Where(t => t.Status == TaskManagementWeb.Models.Enums.TaskStatusEnum.Completed))
+            {
+                <div class="kanban-card border-success border-opacity-25">
+                    <div class="badge bg-success bg-opacity-10 text-success mb-2">
+                        Completed
+                    </div>
+
+                    <h6 class="fw-bold mb-2 text-decoration-line-through text-muted">
+                        @task.Title
+                    </h6>
+
+                    <div class="d-flex justify-content-between align-items-center text-muted small mt-3">
+                        <span>
+                            <i class="bi bi-check2-all text-success"></i> Done
+                        </span>
+
+                        <span class="badge bg-light text-dark">
+                            @task.AssignedUserName
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- 4. Team Management Cards & Activity Timeline -->
+<div class="row g-4 mb-4 fade-up" id="teams" style="animation-delay: 0.4s;">
+    <div class="col-lg-7">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-4">Team Members</h5>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center p-3 rounded-4 bg-white border border-light shadow-sm">
+                        <img src="https://ui-avatars.com/api/?name=System+Admin&background=2563EB&color=fff"
+                             class="team-avatar me-3"
+                             alt="Member" />
+                        <div>
+                            <h6 class="fw-bold mb-0">System Admin</h6>
+                            <span class="badge bg-danger bg-opacity-10 text-danger small">
+                                System Administrator
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center p-3 rounded-4 bg-white border border-light shadow-sm">
+                        <img src="https://ui-avatars.com/api/?name=Alex+Manager&background=60A5FA&color=fff"
+                             class="team-avatar me-3"
+                             alt="Member" />
+                        <div>
+                            <h6 class="fw-bold mb-0">Alex Manager</h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary small">
+                                Project Manager
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center p-3 rounded-4 bg-white border border-light shadow-sm">
+                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=10B981&color=fff"
+                             class="team-avatar me-3"
+                             alt="Member" />
+                        <div>
+                            <h6 class="fw-bold mb-0">John Doe</h6>
+                            <span class="badge bg-success bg-opacity-10 text-success small">
+                                Senior Developer
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center p-3 rounded-4 bg-white border border-light shadow-sm">
+                        <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=F59E0B&color=fff"
+                             class="team-avatar me-3"
+                             alt="Member" />
+                        <div>
+                            <h6 class="fw-bold mb-0">Jane Smith</h6>
+                            <span class="badge bg-warning bg-opacity-10 text-warning small">
+                                UI/UX Designer
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities Timeline -->
+    <div class="col-lg-5">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-4">Recent Activities</h5>
+
+            <div class="ps-2">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="fw-semibold">
+                        System initialized Multi-Agent Architecture
+                    </div>
+                    <div class="small text-muted">
+                        10 mins ago by Main Agent
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background: #22C55E;"></div>
+                    <div class="fw-semibold">
+                        Completed EF Core Database Schema & Seed Data
+                    </div>
+                    <div class="small text-muted">
+                        25 mins ago by Database Agent
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background: #60A5FA;"></div>
+                    <div class="fw-semibold">
+                        Integrated Glassmorphism SaaS UI System
+                    </div>
+                    <div class="small text-muted">
+                        Just now by Frontend Agent
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Line Chart: Velocity
+            const ctxVelocity = document.getElementById('velocityChart').getContext('2d');
+            new Chart(ctxVelocity, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: [12, 19, 15, 25],
+                        borderColor: '#2563EB',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Donut Chart: Status
+            const ctxDonut = document.getElementById('statusDonutChart').getContext('2d');
+            new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'In Progress', 'Completed'],
+                    datasets: [{
+                        data: [@Model.RecentTasks.Count(t => t.Status == TaskManagementWeb.Models.Enums.TaskStatusEnum.Pending), @Model.InProgressTasks, @Model.CompletedTasks],
+                        backgroundColor: ['#94A3B8', '#60A5FA', '#22C55E'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } },
+                    cutout: '70%'
+                }
+            });
+        });
+    </script>
+}

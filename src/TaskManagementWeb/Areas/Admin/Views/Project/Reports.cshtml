@@ -1,0 +1,151 @@
+@using TaskManagementWeb.Models.Entities
+@using TaskManagementWeb.Models.Enums
+@model IEnumerable<Project>
+
+@{
+    ViewData["Title"] = "Báo Cáo & Phân Tích Hiệu Suất Dự Án (Project Reports)";
+    ViewData["ActivePage"] = "Projects";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    int totalProjects = Model?.Count() ?? 0;
+    int activeProjects = Model?.Count(p => p.Status == ProjectStatus.Active) ?? 0;
+    int completedProjects = Model?.Count(p => p.Status == ProjectStatus.Completed) ?? 0;
+    int totalAllTasks = Model?.Sum(p => p.Tasks.Count) ?? 0;
+    int completedAllTasks = Model?.Sum(p => p.Tasks.Count(t => t.Status == TaskStatusEnum.Completed)) ?? 0;
+    int overallProgress = totalAllTasks > 0 ? (int)Math.Round((double)completedAllTasks / totalAllTasks * 100) : 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-bar-chart-fill text-info me-2"></i>Báo Cáo & Hiệu Suất Dự Án Toàn Doanh Nghiệp
+        </h2>
+        <p class="text-muted mb-0">Phân tích tiến độ thực thi, tỷ lệ hoàn thành công việc và sức khỏe tổng thể của các dự án.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="bi bi-arrow-left me-1"></i> Danh Sách Dự Án
+    </a>
+</div>
+
+<!-- 4 KPI Cards for Reports -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="small text-muted text-uppercase fw-semibold mb-1">Tổng Số Dự Án</div>
+            <h3 class="fw-bold text-dark mb-0">@totalProjects</h3>
+            <small class="text-success fw-medium mt-1 d-block">@activeProjects dự án đang hoạt động</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="small text-muted text-uppercase fw-semibold mb-1">Tổng Công Việc</div>
+            <h3 class="fw-bold text-dark mb-0">@totalAllTasks</h3>
+            <small class="text-info fw-medium mt-1 d-block">@completedAllTasks công việc đã hoàn thành</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="small text-muted text-uppercase fw-semibold mb-1">Dự Án Hoàn Thành</div>
+            <h3 class="fw-bold text-success mb-0">@completedProjects</h3>
+            <small class="text-muted mt-1 d-block">đạt chuẩn nghiệm thu</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="small text-muted text-uppercase fw-semibold mb-1">Hiệu Suất Nghiệm Thu</div>
+            <h3 class="fw-bold text-primary mb-0">@overallProgress%</h3>
+            <div class="progress rounded-pill mt-2" style="height: 6px;">
+                <div class="progress-bar bg-primary" style="width: @overallProgress%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Project Health & Velocity Matrix -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-0 pt-4 px-4">
+        <h5 class="fw-bold text-dark mb-0">
+            <i class="bi bi-speedometer2 text-primary me-2"></i>Ma Trận Tiến Độ & Trạng Thái Từng Dự Án
+        </h5>
+    </div>
+    <div class="card-body px-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã & Tên Dự Án</th>
+                        <th>Trưởng Dự Án</th>
+                        <th>Công Việc (Tasks)</th>
+                        <th>Tiến Độ (%)</th>
+                        <th>Trạng Thái</th>
+                        <th>Hạn Chót</th>
+                        <th>Đánh Giá Sức Khỏe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var p in Model)
+                        {
+                            var pTotal = p.Tasks.Count;
+                            var pDone = p.Tasks.Count(t => t.Status == TaskStatusEnum.Completed);
+                            var pProgress = pTotal > 0 ? (int)Math.Round((double)pDone / pTotal * 100) : p.Progress;
+                            var isOverdue = DateTime.Today > p.EndDate.Date && p.Status != ProjectStatus.Completed;
+
+                            <tr>
+                                <td>
+                                    <div class="font-monospace small text-primary fw-bold">@p.ProjectCode</div>
+                                    <a asp-action="Details" asp-route-id="@p.Id" class="fw-bold text-dark text-decoration-none">
+                                        @p.Title
+                                    </a>
+                                </td>
+                                <td class="small fw-semibold text-secondary">
+                                    @(p.ManagerUser?.FullName ?? "Chưa chỉ định")
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border rounded-pill">
+                                        @pDone / @pTotal tasks
+                                    </span>
+                                </td>
+                                <td style="min-width: 130px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1 rounded-pill" style="height: 8px;">
+                                            <div class="progress-bar @(pProgress == 100 ? "bg-success" : pProgress > 50 ? "bg-primary" : "bg-warning")" style="width: @pProgress%"></div>
+                                        </div>
+                                        <span class="small fw-bold">@pProgress%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge @(p.Status == ProjectStatus.Active ? "bg-success" : p.Status == ProjectStatus.Completed ? "bg-primary" : "bg-warning text-dark") rounded-pill">
+                                        @p.Status
+                                    </span>
+                                </td>
+                                <td class="small text-muted">@p.EndDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (isOverdue)
+                                    {
+                                        <span class="badge bg-danger rounded-pill"><i class="bi bi-exclamation-triangle-fill me-1"></i>Quá hạn</span>
+                                    }
+                                    else if (pProgress == 100)
+                                    {
+                                        <span class="badge bg-success rounded-pill"><i class="bi bi-check2-circle me-1"></i>Hoàn thành</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info text-white rounded-pill"><i class="bi bi-shield-check me-1"></i>Đúng tiến độ</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Chưa có dữ liệu báo cáo dự án.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

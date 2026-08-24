@@ -1,0 +1,134 @@
+@using TaskManagementWeb.Models.Entities
+@model IEnumerable<Announcement>
+
+@{
+    ViewData["Title"] = "Quản lý Thông Báo Toàn Hệ Thống";
+    ViewData["ActivePage"] = "Announcement";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-megaphone-fill text-danger me-2"></i>Thông Báo Toàn Hệ Thống (Broadcast)
+        </h2>
+        <p class="text-muted mb-0">Quản lý và phát các thông báo quan trọng, lịch bảo trì hoặc tin tức đến toàn bộ người dùng.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-danger rounded-pill px-4 shadow-sm">
+        <i class="bi bi-plus-circle me-1"></i> Soạn Thông Báo Mới
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+        <div>@TempData["SuccessMessage"]</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Tiêu Đề Thông Báo</th>
+                            <th>Loại Thông Báo</th>
+                            <th>Trạng Thái</th>
+                            <th>Ghim</th>
+                            <th>Ngày Tạo</th>
+                            <th>Hết Hạn</th>
+                            <th class="text-end pe-4">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">@item.Title</div>
+                                    <div class="small text-muted text-truncate" style="max-width: 350px;">@item.Content</div>
+                                </td>
+                                <td>
+                                    @switch (item.Type)
+                                    {
+                                        case "Urgent":
+                                            <span class="badge bg-danger rounded-pill"><i class="bi bi-exclamation-octagon-fill me-1"></i>Khẩn Cấp</span>
+                                            break;
+                                        case "Warning":
+                                            <span class="badge bg-warning text-dark rounded-pill"><i class="bi bi-exclamation-triangle-fill me-1"></i>Cảnh Báo</span>
+                                            break;
+                                        case "Success":
+                                            <span class="badge bg-success rounded-pill"><i class="bi bi-check-circle-fill me-1"></i>Thành Công</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-info text-white rounded-pill"><i class="bi bi-info-circle-fill me-1"></i>Thông Tin</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-action="ToggleActive" asp-route-id="@item.Id" method="post" class="d-inline">
+                                        @if (item.IsActive)
+                                        {
+                                            <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-xs" title="Nhấp để Tắt thông báo">
+                                                <i class="bi bi-broadcast me-1"></i>Đang Bật
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="submit" class="btn btn-sm btn-secondary rounded-pill px-3 shadow-xs" title="Nhấp để Bật thông báo">
+                                                <i class="bi bi-pause-circle me-1"></i>Đã Tắt
+                                            </button>
+                                        }
+                                    </form>
+                                </td>
+                                <td>
+                                    @if (item.IsPinned)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 rounded-pill">
+                                            <i class="bi bi-pin-angle-fill me-1"></i>Ghim đầu
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Không</span>
+                                    }
+                                </td>
+                                <td class="small text-muted">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="small text-muted">
+                                    @(item.ExpiryDate.HasValue ? item.ExpiryDate.Value.ToString("dd/MM/yyyy") : "Vô thời hạn")
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning rounded-start-pill px-3">
+                                            <i class="bi bi-pencil"></i> Sửa
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa thông báo này?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-end-pill px-3">
+                                                <i class="bi bi-trash3"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-megaphone fs-1 text-muted"></i>
+                <p class="text-muted mt-2 mb-3">Chưa có thông báo nào được phát trong hệ thống.</p>
+                <a asp-action="Create" class="btn btn-danger rounded-pill px-4">
+                    <i class="bi bi-plus-lg me-1"></i> Soạn Thông Báo Đầu Tiên
+                </a>
+            </div>
+        }
+    </div>
+</div>

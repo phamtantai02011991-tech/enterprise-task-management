@@ -1,0 +1,48 @@
+﻿@model IEnumerable<Lab01WebClient.Models.Subject>
+
+@{
+    ViewData["Title"] = "Danh sách môn học";
+}
+
+<h1>Danh sách môn học</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Thêm môn học mới</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Mã môn học</th>
+            <th>Tên môn học</th>
+            <th>Học phí</th>
+            <th style="width: 200px;">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.code</td>
+                    <td>@item.Name</td>
+                    <td>@item.Fee.ToString("N0") đ</td>
+                    <td>
+                        <a asp-action="Details" asp-route-code="@item.code" class="btn btn-info btn-sm">Chi tiết</a>
+                        <a asp-action="Delete" asp-route-code="@item.code" class="btn btn-danger btn-sm"
+                           onclick="return confirm('Bạn có chắc muốn xóa môn học này?');">
+                            Xóa
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4" class="text-center">Không có dữ liệu</td>
+            </tr>
+        }
+    </tbody>
+</table>

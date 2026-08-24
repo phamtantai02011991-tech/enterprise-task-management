@@ -1,0 +1,111 @@
+@using TaskManagementWeb.Models.Entities
+@model IEnumerable<Notification>
+
+@{
+    ViewData["Title"] = "Trung Tâm Thông Báo";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-bell-fill text-primary me-2"></i>Trung Tâm Thông Báo (Notifications)
+            </h2>
+            <p class="text-muted mb-0">Theo dõi thông báo công việc, dự án và cảnh báo thời hạn hệ thống.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="btnMarkAllRead">
+                <i class="bi bi-check2-all me-1"></i> Đánh Dấu Đã Đọc Tất Cả
+            </button>
+            <a asp-action="Preferences" class="btn btn-light rounded-pill px-3 border">
+                <i class="bi bi-gear me-1"></i> Cài Đặt
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            @if (Model != null && Model.Any())
+            {
+                <div class="list-group list-group-flush rounded-4">
+                    @foreach (var n in Model)
+                    {
+                        <div class="list-group-item p-4 d-flex justify-content-between align-items-center border-0 border-bottom @(!n.IsRead ? "bg-primary bg-opacity-10 border-start border-4 border-primary" : "")" id="notif-row-@n.Id">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="avatar-sm rounded-circle d-flex align-items-center justify-content-center mt-1 @(!n.IsRead ? "bg-primary text-white" : "bg-light text-secondary border")" style="width: 38px; height: 38px;">
+                                    <i class="bi @(!n.IsRead ? "bi-bell-fill" : "bi-bell") fs-6"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h6 class="fw-bold text-dark mb-0">@n.Title</h6>
+                                        @if (!n.IsRead)
+                                        {
+                                            <span class="badge bg-primary rounded-pill small">Mới</span>
+                                        }
+                                    </div>
+                                    <p class="text-secondary small mb-1 mt-1">@n.Message</p>
+                                    <small class="text-muted"><i class="bi bi-clock me-1"></i>@n.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                            </div>
+
+                            @if (!n.IsRead)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 btn-mark-read" data-id="@n.Id">
+                                    <i class="bi bi-check-lg me-1"></i> Đã đọc
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash" style="font-size: 3.5rem;"></i>
+                    <h5 class="fw-bold text-dark mt-3">Bạn chưa có thông báo nào</h5>
+                    <p class="text-muted">Các cập nhật quan trọng về công việc và dự án sẽ xuất hiện tại đây.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.btn-mark-read').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        fetch('/Notification/MarkAsRead?id=' + id, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.getElementById('notif-row-' + id);
+                    if (row) {
+                        row.classList.remove('bg-primary', 'bg-opacity-10', 'border-start', 'border-4', 'border-primary');
+                        btn.remove();
+                    }
+                }
+            });
+    });
+});
+
+document.getElementById('btnMarkAllRead')?.addEventListener('click', function() {
+    fetch('/Notification/MarkAllAsRead', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+});
+</script>
+}

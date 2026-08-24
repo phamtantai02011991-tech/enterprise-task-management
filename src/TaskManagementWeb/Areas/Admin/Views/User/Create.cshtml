@@ -1,0 +1,91 @@
+@model TaskManagementWeb.Models.ViewModels.Admin.CreateUserViewModel
+@{
+    ViewData["Title"] = "Thêm Người Dùng Mới";
+    ViewData["ActivePage"] = "Users";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Thêm Tài Khoản Người Dùng</h3>
+                <p class="text-muted mb-0">Tạo tài khoản mới và gán vai trò, phòng ban cho nhân sự.</p>
+            </div>
+            <a asp-area="Admin" asp-controller="User" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <form asp-area="Admin" asp-controller="User" asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label fw-semibold"></label>
+                        <input asp-for="FullName" class="form-control rounded-3" placeholder="Nhập họ và tên đầy đủ..." />
+                        <span asp-validation-for="FullName" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" type="email" class="form-control rounded-3" placeholder="name@company.com" />
+                        <span asp-validation-for="Email" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold"></label>
+                        <input asp-for="Password" type="password" class="form-control rounded-3" placeholder="Nhập mật khẩu khởi tạo..." />
+                        <span asp-validation-for="Password" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="RoleId" class="form-label fw-semibold"></label>
+                        <select asp-for="RoleId" class="form-select rounded-3">
+                            <option value="">-- Chọn Vai Trò --</option>
+                            @foreach (var role in Model.AvailableRoles)
+                            {
+                                <option value="@role.Id">@role.RoleName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="RoleId" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Phòng ban tham gia (Có thể chọn 1 hoặc nhiều phòng ban)</label>
+                        <div class="border rounded-3 p-3 bg-light">
+                            @if (Model.AvailableDepartments.Any())
+                            {
+                                <div class="row g-2">
+                                    @foreach (var dept in Model.AvailableDepartments)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="DepartmentIds" value="@dept.Id" id="dept-@dept.Id" @(Model.DepartmentIds.Contains(dept.Id) ? "checked" : "") />
+                                                <label class="form-check-label text-dark" for="dept-@dept.Id">
+                                                    <span class="badge bg-primary font-monospace me-1">Mã: @dept.Code</span>
+                                                    <span class="fw-semibold">@dept.Name</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted fs-7">Chưa có phòng ban nào trong hệ thống.</div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                        <a asp-area="Admin" asp-controller="User" asp-action="Index" class="btn btn-light rounded-pill px-4">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">Tạo Tài Khoản</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

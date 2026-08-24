@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Portal | TaskManagement</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        :root {
+            --admin-sidebar-bg: #1e293b;
+            --admin-sidebar-hover: #334155;
+            --admin-accent: #3b82f6;
+            --admin-accent-gradient: linear-gradient(135deg, #2563eb, #3b82f6);
+            --admin-body-bg: #f8fafc;
+        }
+
+        body {
+            background-color: var(--admin-body-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            width: 260px;
+            background: var(--admin-sidebar-bg);
+            color: #f8fafc;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+        }
+
+        .admin-brand {
+            padding: 1.25rem 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .admin-brand i {
+            color: #60a5fa;
+            font-size: 1.5rem;
+        }
+
+        .admin-menu {
+            padding: 1rem 0.75rem;
+            flex-grow: 1;
+        }
+
+        .admin-menu .nav-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            padding: 0.75rem 1rem 0.25rem;
+            font-weight: 600;
+        }
+
+        .admin-menu .nav-link {
+            color: #cbd5e1;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .admin-menu .nav-link:hover {
+            color: #fff;
+            background: var(--admin-sidebar-hover);
+        }
+
+        .admin-menu .nav-link.active {
+            color: #fff;
+            background: var(--admin-accent);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .admin-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .admin-header {
+            background: #fff;
+            height: 64px;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .admin-main {
+            padding: 2rem;
+            flex-grow: 1;
+        }
+
+        .stat-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .table-custom {
+            background: #fff;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <img src="~/images/logo.png" alt="TaskManagement Logo" class="rounded-3 shadow-sm" style="width: 38px; height: 38px; object-fit: cover;" />
+                <div class="d-flex flex-column">
+                    <span class="fs-6 fw-bold text-white lh-1">TaskManagement</span>
+                    <small style="font-size: 0.65rem; color: #94a3b8; font-weight: normal;">Admin Portal</small>
+                </div>
+            </div>
+            <div class="admin-menu">
+                <div class="nav-label">Main Menu</div>
+                <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Dashboard" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard Overview</span>
+                </a>
+
+                <div class="nav-label">Quản Trị Hệ Thống</div>
+                <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Users" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="User" asp-action="Index">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Quản lý Người dùng</span>
+                </a>
+                <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Departments" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="Department" asp-action="Index">
+                    <i class="bi bi-building"></i>
+                    <span>Quản lý Phòng ban</span>
+                </a>
+
+                <div class="nav-label">Quản Trị Dự Án & Công Việc</div>
+                <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Projects" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="Project" asp-action="Index">
+                    <i class="bi bi-kanban-fill"></i>
+                    <span>Tất Cả Dự Án</span>
+                </a>
+                <a class="nav-link ps-4 py-1 small @(ViewData["ActivePage"]?.ToString() == "ProjectsCreate" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="Project" asp-action="Create">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    <span>Khởi tạo dự án</span>
+                </a>
+                <a class="nav-link ps-4 py-1 small" 
+                   asp-area="Admin" asp-controller="Project" asp-action="Index" asp-route-filter="active">
+                    <i class="bi bi-play-circle me-1"></i>
+                    <span>Dự án đang chạy</span>
+                </a>
+                <a class="nav-link ps-4 py-1 small" 
+                   asp-area="Admin" asp-controller="Project" asp-action="Index" asp-route-filter="completed">
+                    <i class="bi bi-check2-circle me-1"></i>
+                    <span>Dự án hoàn thành</span>
+                </a>
+                <a class="nav-link ps-4 py-1 small" 
+                   asp-area="Admin" asp-controller="Project" asp-action="Index" asp-route-filter="archived">
+                    <i class="bi bi-archive me-1"></i>
+                    <span>Kho lưu trữ (Archived)</span>
+                </a>
+                <a class="nav-link ps-4 py-1 small" 
+                   asp-area="Admin" asp-controller="Project" asp-action="Reports">
+                    <i class="bi bi-bar-chart-line me-1"></i>
+                    <span>Báo cáo dự án</span>
+                </a>
+
+                <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Tasks" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="Task" asp-action="Index">
+                    <i class="bi bi-list-check"></i>
+                    <span>Giám sát Công việc</span>
+                </a>
+
+                <div class="nav-label">Thông Báo & Giám Sát</div>
+                <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Announcement" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="Announcement" asp-action="Index">
+                    <i class="bi bi-megaphone-fill"></i>
+                    <span>Thông Báo Hệ Thống</span>
+                </a>
+                <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "AuditLogs" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="AuditLog" asp-action="Index">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Nhật ký Audit Logs</span>
+                </a>
+            </div>
+
+            <div class="p-3 border-top border-secondary">
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="btn btn-outline-light w-100 btn-sm d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="admin-content">
+            <!-- Header -->
+            <header class="admin-header">
+                <div class="fw-semibold text-secondary">
+                    <i class="bi bi-house-door me-1"></i> Admin Console / @ViewData["Title"]
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Notification Bell Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-light rounded-circle p-2 shadow-sm border-0 position-relative" type="button" id="adminNotifBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                            <i class="bi bi-bell-fill fs-5 text-secondary"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="adminNotifBadge">
+                                0
+                            </span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0" style="width: 340px;" aria-labelledby="adminNotifBtn">
+                            <div class="p-3 bg-light rounded-top-4 d-flex justify-content-between align-items-center border-bottom">
+                                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-bell text-primary me-2"></i>Thông báo</h6>
+                                <a asp-area="" asp-controller="Notification" asp-action="Index" class="small text-primary text-decoration-none">Xem tất cả</a>
+                            </div>
+                            <div class="p-2" id="adminNotifList" style="max-height: 280px; overflow-y: auto;">
+                                <div class="text-center py-3 text-muted small">Đang tải thông báo...</div>
+                            </div>
+                            <div class="p-2 text-center border-top bg-light rounded-bottom-4">
+                                <a asp-area="" asp-controller="Notification" asp-action="Preferences" class="small text-muted text-decoration-none">
+                                    <i class="bi bi-sliders me-1"></i> Cài đặt thông báo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <div class="fw-bold text-dark">@User.Identity?.Name</div>
+                        <small class="badge bg-primary text-white">Administrator</small>
+                    </div>
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-person-fill fs-5"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Body -->
+            <main class="admin-main">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-4" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+    function loadAdminNotifs() {
+        fetch('/Notification/GetUnreadSummary')
+            .then(res => res.json())
+            .then(data => {
+                const badge = document.getElementById('adminNotifBadge');
+                const list = document.getElementById('adminNotifList');
+                if (badge && data.unreadCount > 0) {
+                    badge.textContent = data.unreadCount;
+                    badge.classList.remove('d-none');
+                } else if (badge) {
+                    badge.classList.add('d-none');
+                }
+
+                if (list && data.items) {
+                    if (data.items.length === 0) {
+                        list.innerHTML = '<div class="text-center py-3 text-muted small">Không có thông báo mới</div>';
+                    } else {
+                        list.innerHTML = data.items.map(item => `
+                            <div class="p-2 border-bottom ${item.isRead ? '' : 'bg-light'} rounded-3 mb-1">
+                                <div class="fw-semibold small text-dark">${item.title}</div>
+                                <div class="small text-secondary text-truncate" style="max-width: 300px;">${item.message}</div>
+                                <small class="text-muted fs-8">${item.timeAgo}</small>
+                            </div>
+                        `).join('');
+                    }
+                }
+            }).catch(() => {});
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAdminNotifs();
+        setInterval(loadAdminNotifs, 30000);
+    });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

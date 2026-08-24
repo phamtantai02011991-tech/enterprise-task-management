@@ -1,0 +1,200 @@
+@using TaskManagementWeb.Models.Entities
+@using TaskManagementWeb.Models.Enums
+@model IEnumerable<TaskItem>
+
+@{
+    ViewData["Title"] = "Giám Sát Công Việc Toàn Doanh Nghiệp (Task Oversight)";
+    ViewData["ActivePage"] = "Tasks";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-list-task text-primary me-2"></i>Giám Sát Công Việc Toàn Doanh Nghiệp
+        </h2>
+        <p class="text-muted mb-0">Theo dõi toàn bộ các đầu việc, phân bổ nhân sự, mức độ ưu tiên và phát hiện công việc trễ hạn.</p>
+    </div>
+</div>
+
+<!-- 4 KPI Metrics -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="small text-muted text-uppercase fw-semibold mb-1">Tổng Số Công Việc</div>
+            <h3 class="fw-bold text-dark mb-0">@ViewBag.TotalCount</h3>
+            <small class="text-muted mt-1 d-block">trên toàn hệ thống</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="small text-muted text-uppercase fw-semibold mb-1">Đang Thực Hiện</div>
+            <h3 class="fw-bold text-primary mb-0">@ViewBag.InProgressCount</h3>
+            <small class="text-primary mt-1 d-block">đang được xử lý</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="small text-muted text-uppercase fw-semibold mb-1">Đã Hoàn Thành</div>
+            <h3 class="fw-bold text-success mb-0">@ViewBag.CompletedCount</h3>
+            <small class="text-success mt-1 d-block">nghiệm thu đạt chuẩn</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="small text-muted text-uppercase fw-semibold mb-1">Công Việc Quá Hạn</div>
+            <h3 class="fw-bold text-danger mb-0">@ViewBag.OverdueCount</h3>
+            <small class="text-danger mt-1 d-block">cần nhắc nhở xử lý</small>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <input type="text" name="search" value="@ViewBag.SearchQuery" class="form-control rounded-pill" placeholder="Tìm theo tên task, dự án, nhân sự..." />
+            </div>
+            <div class="col-md-3">
+                <select name="projectId" class="form-select rounded-pill">
+                    <option value="">-- Tất cả Dự án --</option>
+                    @if (ViewBag.Projects != null)
+                    {
+                        @foreach (var prj in ViewBag.Projects)
+                        {
+                            <option value="@prj.Id" selected="@(ViewBag.SelectedProjectId == prj.Id)">@prj.Title</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select rounded-pill" asp-items="Html.GetEnumSelectList<TaskStatusEnum>()">
+                    <option value="">-- Trạng thái --</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="priority" class="form-select rounded-pill" asp-items="Html.GetEnumSelectList<TaskPriority>()">
+                    <option value="">-- Ưu tiên --</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill px-3 flex-grow-1">
+                    <i class="bi bi-filter"></i> Lọc
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Global Tasks Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Công Việc & Dự Án</th>
+                            <th>Người Phụ Trách</th>
+                            <th>Mức Độ Ưu Tiên</th>
+                            <th>Trạng Thái</th>
+                            <th>Hạn Chót</th>
+                            <th class="text-end pe-4">Chi Tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model)
+                        {
+                            var isOverdue = t.Deadline < DateTime.Today && t.Status != TaskStatusEnum.Completed;
+
+                            <tr>
+                                <td class="ps-4">
+                                    <a asp-action="Details" asp-route-id="@t.Id" class="fw-bold text-dark text-decoration-none hover-primary">
+                                        @t.Title
+                                    </a>
+                                    <div class="small text-muted">
+                                        Thuộc dự án: <a asp-controller="Project" asp-action="Details" asp-route-id="@t.ProjectId" class="text-primary text-decoration-none">
+                                            [@t.Project?.ProjectCode] @t.Project?.Title
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (t.AssignedUser != null)
+                                    {
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-xs bg-light text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold border" style="width: 28px; height: 28px; font-size: 11px;">
+                                                @(t.AssignedUser.FullName.Length > 0 ? t.AssignedUser.FullName.Substring(0, 1).ToUpper() : "U")
+                                            </div>
+                                            <div class="small fw-semibold">@t.AssignedUser.FullName</div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border rounded-pill">Chưa phân công</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (t.Priority == TaskPriority.High)
+                                    {
+                                        <span class="badge bg-danger rounded-pill"><i class="bi bi-fire me-1"></i>Cao</span>
+                                    }
+                                    else if (t.Priority == TaskPriority.Medium)
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill">Trung bình</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark border rounded-pill">Thấp</span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (t.Status)
+                                    {
+                                        case TaskStatusEnum.Completed:
+                                            <span class="badge bg-success rounded-pill px-3 py-1">Hoàn thành</span>
+                                            break;
+                                        case TaskStatusEnum.InProgress:
+                                            <span class="badge bg-primary rounded-pill px-3 py-1">Đang làm</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary rounded-pill px-3 py-1">Chờ xử lý</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (isOverdue)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-1">
+                                            @t.Deadline.ToString("dd/MM/yyyy") (Quá hạn)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="small text-muted">@t.Deadline.ToString("dd/MM/yyyy")</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-action="Details" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="bi bi-eye me-1"></i> Xem
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-list-task fs-1"></i>
+                <h5 class="fw-bold text-dark mt-2">Không tìm thấy công việc nào</h5>
+                <p class="text-muted">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+            </div>
+        }
+    </div>
+</div>

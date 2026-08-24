@@ -1,0 +1,90 @@
+@model TaskManagementWeb.Models.ViewModels.Admin.DepartmentFormViewModel
+@{
+    ViewData["Title"] = "Chỉnh Sửa Phòng Ban";
+    ViewData["ActivePage"] = "Departments";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Cập Nhật Phòng Ban</h3>
+                <p class="text-muted mb-0">Chỉnh sửa mã và tên phòng ban.</p>
+            </div>
+            <a asp-area="Admin" asp-controller="Department" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+
+                @if (Model.MemberCount > 0)
+                {
+                    <div class="alert alert-info rounded-3 mb-4 d-flex align-items-start gap-3">
+                        <i class="bi bi-bell-fill fs-4 text-info flex-shrink-0 mt-1"></i>
+                        <div>
+                            <strong class="d-block mb-1">Quy trình Quản lý & Thông báo tự động:</strong>
+                            <span>Phòng ban này hiện có <strong>@Model.MemberCount nhân viên</strong>. Khi bạn thay đổi Tên hoặc Mã phòng ban, hệ thống sẽ <strong>tự động phát thông báo</strong> tới tất cả nhân viên thuộc phòng ban này và ghi vết vào <strong>Audit Log</strong>.</span>
+                        </div>
+                    </div>
+                }
+
+                <form asp-area="Admin" asp-controller="Department" asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="MemberCount" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Code" class="form-label fw-semibold"></label>
+                        <input asp-for="Code" class="form-control rounded-3 font-monospace text-uppercase" placeholder="Ví dụ: DEV, HR, UIUX..." />
+                        <span asp-validation-for="Code" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label fw-semibold"></label>
+                        <input asp-for="Name" class="form-control rounded-3" placeholder="Nhập tên phòng ban đầy đủ..." />
+                        <span asp-validation-for="Name" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Description" class="form-control rounded-3" rows="3" placeholder="Mô tả chức năng, nhiệm vụ phòng ban..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Phân bổ Nhân sự vào Phòng ban (Có thể tích chọn nhiều nhân viên)</label>
+                        <div class="border rounded-3 p-3 bg-light" style="max-height: 260px; overflow-y: auto;">
+                            @if (Model.AvailableUsers.Any())
+                            {
+                                <div class="row g-2">
+                                    @foreach (var userItem in Model.AvailableUsers)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="SelectedUserIds" value="@userItem.Id" id="user-@userItem.Id" @(userItem.IsSelected ? "checked" : "") />
+                                                <label class="form-check-label text-dark" for="user-@userItem.Id">
+                                                    <span class="fw-semibold">@userItem.FullName</span>
+                                                    <div class="text-muted fs-7">@userItem.Email <span class="badge @(userItem.RoleName == "Admin" ? "bg-danger" : userItem.RoleName == "Manager" ? "bg-warning text-dark" : "bg-info text-white") ms-1">@userItem.RoleName</span></div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted fs-7">Chưa có nhân sự nào trong hệ thống.</div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                        <a asp-area="Admin" asp-controller="Department" asp-action="Index" class="btn btn-light rounded-pill px-4">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">Lưu Thay Đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

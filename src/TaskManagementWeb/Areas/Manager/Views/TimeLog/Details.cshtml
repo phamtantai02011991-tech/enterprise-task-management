@@ -1,0 +1,37 @@
+@model TaskManagementWeb.Models.Entities.TimeLog
+
+@{
+    ViewData["Title"] = "Chi tiết Time Log";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Chi tiết Nhật ký Thời gian</h1>
+    <hr />
+
+    <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-clock me-1"></i> Thông tin bản ghi</div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-2">Nhân sự thực hiện:</dt>
+                <dd class="col-sm-10 fw-bold text-primary">@(Model.User?.FullName ?? "N/A")</dd>
+
+                <dt class="col-sm-2">Thuộc Task:</dt>
+                <dd class="col-sm-10">@(Model.TaskItem?.Title ?? "N/A")</dd>
+
+                <dt class="col-sm-2">Dự án:</dt>
+                <dd class="col-sm-10">@(Model.TaskItem?.Project?.Title ?? "N/A")</dd>
+
+                <dt class="col-sm-2">Số giờ làm:</dt>
+                <dd class="col-sm-10"><span class="badge bg-success">@Model.HoursSpent giờ</span></dd>
+
+                <dt class="col-sm-2">Ngày ghi nhận:</dt>
+                <dd class="col-sm-10">@Model.DateLogged.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-2">Mô tả chi tiết:</dt>
+                <dd class="col-sm-10">@Model.Description</dd>
+            </dl>
+
+            <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+        </div>
+    </div>
+</div>

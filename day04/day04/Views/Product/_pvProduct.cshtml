@@ -1,0 +1,35 @@
+﻿@model day04.ViewModels.ProductStatisticsViewModel
+<div class="row">
+	<div class="col">
+		<div class="card">
+			<div class="card-body">
+				<h5>Total Products</h5>
+				<h3>@Model.TotalProducts</h3>
+			</div>
+		</div>
+	</div>
+	<div class="col">
+		<div class="card">
+			<div class="card-body">
+				<h5>Total Quantity</h5>
+				<h3>@Model.TotalQuantity</h3>
+			</div>
+		</div>
+	</div>
+	<div class="col">
+		<div class="card">
+			<div class="card-body">
+				<h5>Inventory Value</h5>
+				<h3>@Model.TotalInventoryValue.ToString("N0") VNĐ</h3>
+			</div>
+		</div>
+	</div>
+	<div class="col">
+		<div class="card">
+			<div class="card-body">
+				<h5>Total Categories</h5>
+				<h3>@Model.TotalCategories</h3>
+			</div>
+		</div>
+	</div>
+</div>

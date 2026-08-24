@@ -1,0 +1,140 @@
+@using TaskManagementWeb.ViewModels.Manager
+@using TaskManagementWeb.Models.Enums
+@model ProjectCreateUpdateViewModel
+
+@{
+    ViewData["Title"] = "Khởi Tạo Dự Án Mới (Admin)";
+    ViewData["ActivePage"] = "Projects";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-folder-plus text-primary me-2"></i>Khởi Tạo Dự Án Doanh Nghiệp
+        </h2>
+        <p class="text-muted mb-0">Thiết lập điều lệ dự án, chỉ định Trưởng dự án (Project Manager) và phân bổ đội ngũ ban đầu.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Row 1: Code & Title -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="ProjectCode" class="form-label fw-semibold">Mã Dự Án (Project Code) <span class="text-danger">*</span></label>
+                            <input asp-for="ProjectCode" class="form-control font-monospace fw-bold" placeholder="VD: PRJ-2026-001" required />
+                            <small class="text-muted">Mã định danh duy nhất của dự án trên hệ thống.</small>
+                            <span asp-validation-for="ProjectCode" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="Title" class="form-label fw-semibold">Tên Dự Án (Project Title) <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="VD: Xây dựng Cổng thông tin Doanh nghiệp 2026" required />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Description -->
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-semibold">Mô Tả & Mục Tiêu Dự Án</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Mục tiêu kinh doanh, phạm vi công việc, yêu cầu kỹ thuật và các mốc bàn giao chính..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Row 3: Manager Assignment, Status & Priority -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="ManagerId" class="form-label fw-semibold text-primary">
+                                <i class="bi bi-person-badge me-1"></i>Chỉ Định Trưởng Dự Án (Manager) <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="ManagerId" class="form-select border-primary" required>
+                                <option value="">-- Chọn Trưởng Dự Án (PM) --</option>
+                                @if (Model.AvailableManagers != null)
+                                {
+                                    @foreach (var mgr in Model.AvailableManagers)
+                                    {
+                                        <option value="@mgr.Value">@mgr.Text</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="ManagerId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Status" class="form-label fw-semibold">Trạng Thái Vòng Đời</label>
+                            <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ProjectStatus>()"></select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Priority" class="form-label fw-semibold">Mức Độ Ưu Tiên</label>
+                            <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<ProjectPriority>()"></select>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: Dates & Progress -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="StartDate" class="form-label fw-semibold">Ngày Bắt Đầu <span class="text-danger">*</span></label>
+                            <input asp-for="StartDate" type="date" class="form-control" required />
+                            <span asp-validation-for="StartDate" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="EndDate" class="form-label fw-semibold">Ngày Kết Thúc (Deadline) <span class="text-danger">*</span></label>
+                            <input asp-for="EndDate" type="date" class="form-control" required />
+                            <span asp-validation-for="EndDate" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Progress" class="form-label fw-semibold">Tiến Độ Ban Đầu (%)</label>
+                            <input asp-for="Progress" type="number" min="0" max="100" class="form-control" />
+                        </div>
+                    </div>
+
+                    <!-- Row 5: Initial Team Members Allocation -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-dark">
+                            <i class="bi bi-people-fill text-primary me-1"></i>Phân Bổ Thành Viên Ban Đầu Vào Đội Ngũ (Team Members)
+                        </label>
+                        <div class="border rounded-4 p-3 bg-light" style="max-height: 220px; overflow-y: auto;">
+                            @if (Model.AvailableEmployees != null && Model.AvailableEmployees.Any())
+                            {
+                                <div class="row g-2">
+                                    @foreach (var emp in Model.AvailableEmployees)
+                                    {
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="form-check p-2 bg-white rounded-3 shadow-xs border">
+                                                <input class="form-check-input ms-1" type="checkbox" name="SelectedMemberIds" value="@emp.Value" id="emp_@emp.Value" />
+                                                <label class="form-check-label ms-2 small fw-semibold text-dark" for="emp_@emp.Value">
+                                                    @emp.Text
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted small mb-0">Chưa có danh sách nhân viên khả dụng.</p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <a asp-action="Index" class="btn btn-light rounded-pill px-4">Hủy Bỏ</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                            <i class="bi bi-check2-circle me-1"></i> Hoàn Tất & Khởi Tạo Dự Án
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

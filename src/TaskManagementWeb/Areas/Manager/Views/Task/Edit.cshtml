@@ -1,0 +1,71 @@
+@model TaskManagementWeb.Models.Entities.TaskItem
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Task";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Chỉnh sửa Công việc</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Edit">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ProjectId" />
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">Tiêu đề Task</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Mô tả chi tiết</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Priority" class="form-label">Độ ưu tiên</label>
+                        <select asp-for="Priority" class="form-control">
+                            <option value="Low">Thấp</option>
+                            <option value="Medium">Trung bình</option>
+                            <option value="High">Cao</option>
+                        </select>
+                        <span asp-validation-for="Priority" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Status" class="form-label">Trạng thái</label>
+                        <select asp-for="Status" class="form-control">
+                            <option value="Todo">Cần làm</option>
+                            <option value="InProgress">Đang thực hiện</option>
+                            <option value="Completed">Hoàn thành</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Deadline" class="form-label">Hạn chót</label>
+                        <input asp-for="Deadline" class="form-control" />
+                        <span asp-validation-for="Deadline" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="AssignedUserId" class="form-label">Phân công cho nhân sự</label>
+                        <select asp-for="AssignedUserId" class="form-control" asp-items="ViewBag.AssignedUserId">
+                            <option value="">-- Chọn nhân sự thực hiện --</option>
+                        </select>
+                        <span asp-validation-for="AssignedUserId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                <a asp-action="Index" asp-route-projectId="@Model.ProjectId" class="btn btn-secondary">Quay lại</a>
+            </form>
+        </div>
+    </div>
+</div>

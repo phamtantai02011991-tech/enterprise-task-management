@@ -1,0 +1,305 @@
+@using TaskManagementWeb.Models.Entities
+@using TaskManagementWeb.Models.Enums
+@model IEnumerable<Project>
+
+@{
+    ViewData["Title"] = "Quản Trị Vòng Đời Dự Án (Project Governance)";
+    ViewData["ActivePage"] = "Projects";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    string currentFilter = (ViewBag.CurrentFilter as string) ?? "all";
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-kanban-fill text-primary me-2"></i>Quản Trị Dự Án Doanh Nghiệp
+        </h2>
+        <p class="text-muted mb-0">Quản lý toàn bộ vòng đời dự án: Khởi tạo, bổ nhiệm Manager, phân bổ nhân sự, giám sát tiến độ và đóng băng lưu trữ.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Reports" class="btn btn-outline-info rounded-pill px-3 shadow-sm">
+            <i class="bi bi-bar-chart-line me-1"></i> Báo Cáo Dự Án
+        </a>
+        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Khởi Tạo Dự Án Mới
+        </a>
+    </div>
+</div>
+
+<!-- 5 Summary KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-xl col-md-4 col-sm-6">
+        <a asp-action="Index" asp-route-filter="all" class="text-decoration-none">
+            <div class="card border-0 shadow-sm rounded-4 p-3 @(currentFilter == "all" ? "bg-primary text-white" : "bg-white text-dark") h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-uppercase fw-semibold @(currentFilter == "all" ? "text-white-50" : "text-muted")">Tất Cả Dự Án</div>
+                        <h3 class="fw-bold mb-0">@ViewBag.CountAll</h3>
+                    </div>
+                    <i class="bi bi-folder-fill fs-2 @(currentFilter == "all" ? "text-white-50" : "text-primary")"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl col-md-4 col-sm-6">
+        <a asp-action="Index" asp-route-filter="planning" class="text-decoration-none">
+            <div class="card border-0 shadow-sm rounded-4 p-3 @(currentFilter == "planning" ? "bg-info text-white" : "bg-white text-dark") h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-uppercase fw-semibold @(currentFilter == "planning" ? "text-white-50" : "text-muted")">Lập Kế Hoạch (Planning)</div>
+                        <h3 class="fw-bold mb-0">@ViewBag.CountPlanning</h3>
+                    </div>
+                    <i class="bi bi-clipboard-data-fill fs-2 @(currentFilter == "planning" ? "text-white-50" : "text-info")"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl col-md-4 col-sm-6">
+        <a asp-action="Index" asp-route-filter="active" class="text-decoration-none">
+            <div class="card border-0 shadow-sm rounded-4 p-3 @(currentFilter == "active" ? "bg-success text-white" : "bg-white text-dark") h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-uppercase fw-semibold @(currentFilter == "active" ? "text-white-50" : "text-muted")">Đang Triển Khai</div>
+                        <h3 class="fw-bold mb-0">@ViewBag.CountActive</h3>
+                    </div>
+                    <i class="bi bi-play-circle-fill fs-2 @(currentFilter == "active" ? "text-white-50" : "text-success")"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl col-md-4 col-sm-6">
+        <a asp-action="Index" asp-route-filter="completed" class="text-decoration-none">
+            <div class="card border-0 shadow-sm rounded-4 p-3 @(currentFilter == "completed" ? "bg-teal text-white" : "bg-white text-dark") h-100" style="@(currentFilter == "completed" ? "background: #0d9488;" : "")">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-uppercase fw-semibold @(currentFilter == "completed" ? "text-white-50" : "text-muted")">Đã Hoàn Thành</div>
+                        <h3 class="fw-bold mb-0">@ViewBag.CountCompleted</h3>
+                    </div>
+                    <i class="bi bi-check2-all fs-2 @(currentFilter == "completed" ? "text-white-50" : "text-success")"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl col-md-4 col-sm-6">
+        <a asp-action="Index" asp-route-filter="archived" class="text-decoration-none">
+            <div class="card border-0 shadow-sm rounded-4 p-3 @(currentFilter == "archived" ? "bg-secondary text-white" : "bg-white text-dark") h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-uppercase fw-semibold @(currentFilter == "archived" ? "text-white-50" : "text-muted")">Kho Đóng Băng</div>
+                        <h3 class="fw-bold mb-0">@ViewBag.CountArchived</h3>
+                    </div>
+                    <i class="bi bi-archive-fill fs-2 @(currentFilter == "archived" ? "text-white-50" : "text-secondary")"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Search Bar & Filters -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <input type="hidden" name="filter" value="@currentFilter" />
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="search" value="@ViewBag.SearchQuery" class="form-control border-start-0 rounded-end-pill py-2" placeholder="Tìm kiếm theo mã dự án, tên dự án hoặc từ khóa..." />
+                </div>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill px-4 flex-grow-1">
+                    <i class="bi bi-filter me-1"></i> Lọc Dự Án
+                </button>
+                @if (!string.IsNullOrEmpty(ViewBag.SearchQuery as string))
+                {
+                    <a asp-action="Index" asp-route-filter="@currentFilter" class="btn btn-outline-secondary rounded-pill px-3">Xóa lọc</a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Projects Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Mã & Tên Dự Án</th>
+                            <th>Trưởng Dự Án (Manager)</th>
+                            <th>Tiến Độ (%)</th>
+                            <th>Thời Hạn</th>
+                            <th>Trạng Thái</th>
+                            <th>Độ Ưu Tiên</th>
+                            <th class="text-end pe-4">Quản Trị</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            var totalTasks = p.Tasks.Count;
+                            var completedTasks = p.Tasks.Count(t => t.Status == TaskStatusEnum.Completed);
+                            var progress = totalTasks > 0 ? (int)Math.Round((double)completedTasks / totalTasks * 100) : p.Progress;
+                            var isOverdue = DateTime.Today > p.EndDate.Date && p.Status != ProjectStatus.Completed;
+
+                            <tr class="@(p.IsArchived ? "table-light text-muted" : "")">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary font-monospace px-2 py-1 rounded">
+                                            @p.ProjectCode
+                                        </span>
+                                        @if (p.IsArchived)
+                                        {
+                                            <span class="badge bg-secondary rounded-pill small"><i class="bi bi-lock-fill me-1"></i>Archived</span>
+                                        }
+                                    </div>
+                                    <a asp-action="Details" asp-route-id="@p.Id" class="fw-bold text-dark text-decoration-none mt-1 d-inline-block hover-primary">
+                                        @p.Title
+                                    </a>
+                                    <div class="small text-muted">@totalTasks công việc &bull; @p.ProjectMembers.Count thành viên</div>
+                                </td>
+                                <td>
+                                    @if (p.ManagerUser != null)
+                                    {
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-xs bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 30px; height: 30px; font-size: 12px;">
+                                                @(p.ManagerUser.FullName.Length > 0 ? p.ManagerUser.FullName.Substring(0, 1).ToUpper() : "M")
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold small">@p.ManagerUser.FullName</div>
+                                                <small class="text-muted">@p.ManagerUser.Email</small>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill">Chưa chỉ định</span>
+                                    }
+                                </td>
+                                <td style="min-width: 140px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1 rounded-pill" style="height: 8px;">
+                                            <div class="progress-bar @(progress == 100 ? "bg-success" : progress > 50 ? "bg-primary" : "bg-warning")" style="width: @progress%"></div>
+                                        </div>
+                                        <span class="small fw-bold">@progress%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <div>@p.StartDate.ToString("dd/MM/yyyy") - @p.EndDate.ToString("dd/MM/yyyy")</div>
+                                        @if (isOverdue)
+                                        {
+                                            <span class="badge bg-danger rounded-pill small">Quá hạn</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @switch (p.Status)
+                                    {
+                                        case ProjectStatus.Active:
+                                            <span class="badge bg-success rounded-pill px-3 py-1">Active</span>
+                                            break;
+                                        case ProjectStatus.Planning:
+                                            <span class="badge bg-info text-white rounded-pill px-3 py-1">Planning</span>
+                                            break;
+                                        case ProjectStatus.OnHold:
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-1">On Hold</span>
+                                            break;
+                                        case ProjectStatus.Completed:
+                                            <span class="badge bg-primary rounded-pill px-3 py-1">Completed</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary rounded-pill px-3 py-1">Cancelled</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (p.Priority == ProjectPriority.Urgent)
+                                    {
+                                        <span class="badge bg-danger rounded-pill"><i class="bi bi-fire me-1"></i>Khẩn cấp</span>
+                                    }
+                                    else if (p.Priority == ProjectPriority.High)
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill">Cao</span>
+                                    }
+                                    else if (p.Priority == ProjectPriority.Medium)
+                                    {
+                                        <span class="badge bg-primary rounded-pill">Trung bình</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark border rounded-pill">Thấp</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light rounded-pill px-3 border" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Details" asp-route-id="@p.Id">
+                                                    <i class="bi bi-eye text-primary me-2"></i>Chi tiết 7 Phân Hệ
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Edit" asp-route-id="@p.Id">
+                                                    <i class="bi bi-pencil text-warning me-2"></i>Chỉnh sửa thông tin
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if (!p.IsArchived)
+                                            {
+                                                <li>
+                                                    <form asp-action="Archive" asp-route-id="@p.Id" method="post" onsubmit="return confirm('Chuyển dự án vào kho đóng băng (Archived)?');">
+                                                        <button type="submit" class="dropdown-item text-secondary">
+                                                            <i class="bi bi-archive me-2"></i>Đóng băng (Archive)
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                            else
+                                            {
+                                                <li>
+                                                    <form asp-action="Unarchive" asp-route-id="@p.Id" method="post">
+                                                        <button type="submit" class="dropdown-item text-success">
+                                                            <i class="bi bi-unlock me-2"></i>Mở khóa phục hồi
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                            <li>
+                                                <form asp-action="Delete" asp-route-id="@p.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn dự án này?');">
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="bi bi-trash3 me-2"></i>Xóa vĩnh viễn
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-folder-x text-muted" style="font-size: 4rem;"></i>
+                <h5 class="fw-bold text-dark mt-3">Không tìm thấy dự án nào</h5>
+                <p class="text-muted mb-4">Chưa có dự án nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm của bạn.</p>
+                <a asp-action="Create" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-plus-lg me-1"></i> Khởi Tạo Dự Án Mới
+                </a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,329 @@
+@using TaskManagementWeb.Models.Entities
+@using TaskManagementWeb.Models.Enums
+@model IEnumerable<Project>
+
+@{
+    ViewData["Title"] = "Quản lý Dự án";
+    var currentStatus = ViewBag.CurrentStatus as ProjectStatus?;
+    bool showArchived = ViewBag.ShowArchived == true;
+    string searchQuery = ViewBag.SearchQuery as string ?? "";
+}
+
+<div class="container-fluid px-4 py-3">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-kanban text-primary me-2"></i>Quản lý Dự án
+            </h2>
+            <p class="text-muted mb-0">Theo dõi tiến độ, phân công nguồn lực và quản lý danh mục dự án doanh nghiệp.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Tạo Dự án Mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Filter & Search Toolbar -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <div class="row g-3 align-items-center">
+                <!-- Status Filter Pills -->
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap gap-1">
+                        <a asp-action="Index" class="btn btn-sm rounded-pill @(!currentStatus.HasValue && !showArchived ? "btn-primary" : "btn-light text-secondary")">
+                            Tất cả
+                        </a>
+                        <a asp-action="Index" asp-route-status="@ProjectStatus.Planning" class="btn btn-sm rounded-pill @(currentStatus == ProjectStatus.Planning ? "btn-info text-white" : "btn-light text-secondary")">
+                            <i class="bi bi-calendar-event me-1"></i> Planning
+                        </a>
+                        <a asp-action="Index" asp-route-status="@ProjectStatus.Active" class="btn btn-sm rounded-pill @(currentStatus == ProjectStatus.Active ? "btn-success" : "btn-light text-secondary")">
+                            <i class="bi bi-lightning-charge me-1"></i> Active
+                        </a>
+                        <a asp-action="Index" asp-route-status="@ProjectStatus.OnHold" class="btn btn-sm rounded-pill @(currentStatus == ProjectStatus.OnHold ? "btn-warning text-dark" : "btn-light text-secondary")">
+                            <i class="bi bi-pause-circle me-1"></i> On Hold
+                        </a>
+                        <a asp-action="Index" asp-route-status="@ProjectStatus.Completed" class="btn btn-sm rounded-pill @(currentStatus == ProjectStatus.Completed ? "btn-primary" : "btn-light text-secondary")">
+                            <i class="bi bi-check2-all me-1"></i> Completed
+                        </a>
+                        <a asp-action="Index" asp-route-status="@ProjectStatus.Cancelled" class="btn btn-sm rounded-pill @(currentStatus == ProjectStatus.Cancelled ? "btn-danger" : "btn-light text-secondary")">
+                            <i class="bi bi-x-circle me-1"></i> Cancelled
+                        </a>
+                        <a asp-action="Index" asp-route-showArchived="true" class="btn btn-sm rounded-pill @(showArchived ? "btn-secondary" : "btn-light text-secondary")">
+                            <i class="bi bi-archive me-1"></i> Kho Lưu Trữ
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Search Input -->
+                <div class="col-lg-4">
+                    <form method="get" asp-action="Index" class="d-flex">
+                        @if (currentStatus.HasValue)
+                        {
+                            <input type="hidden" name="status" value="@currentStatus" />
+                        }
+                        @if (showArchived)
+                        {
+                            <input type="hidden" name="showArchived" value="true" />
+                        }
+                        <div class="input-group">
+                            <input type="text" name="search" value="@searchQuery" class="form-control form-control-sm rounded-start-pill ps-3" placeholder="Tìm theo tên, mã dự án..." />
+                            <button class="btn btn-sm btn-outline-primary rounded-end-pill px-3" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Grid / Cards -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var project in Model)
+            {
+                var daysRemaining = (int)(project.EndDate.Date - DateTime.Today).TotalDays;
+                var isOverdue = DateTime.Today > project.EndDate.Date && project.Status != ProjectStatus.Completed;
+
+                <div class="col-xl-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 transition-hover @(project.IsArchived ? "bg-light opacity-75" : "")">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <!-- Top Bar: Code, Priority & Status -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-3 fw-semibold">
+                                    <i class="bi bi-hash"></i>@(string.IsNullOrEmpty(project.ProjectCode) ? $"PRJ-{project.Id:D3}" : project.ProjectCode)
+                                </span>
+                                
+                                <div class="d-flex gap-1 align-items-center">
+                                    <!-- Priority Badge -->
+                                    @switch (project.Priority)
+                                    {
+                                        case ProjectPriority.Urgent:
+                                            <span class="badge bg-danger rounded-pill"><i class="bi bi-fire me-1"></i>Khẩn cấp</span>
+                                            break;
+                                        case ProjectPriority.High:
+                                            <span class="badge bg-warning text-dark rounded-pill">Cao</span>
+                                            break;
+                                        case ProjectPriority.Medium:
+                                            <span class="badge bg-info text-dark rounded-pill">Trung bình</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary rounded-pill">Thấp</span>
+                                            break;
+                                    }
+
+                                    <!-- Status Badge -->
+                                    @switch (project.Status)
+                                    {
+                                        case ProjectStatus.Active:
+                                            <span class="badge bg-success rounded-pill">Active</span>
+                                            break;
+                                        case ProjectStatus.Planning:
+                                            <span class="badge bg-info text-white rounded-pill">Planning</span>
+                                            break;
+                                        case ProjectStatus.OnHold:
+                                            <span class="badge bg-warning text-dark rounded-pill">On Hold</span>
+                                            break;
+                                        case ProjectStatus.Completed:
+                                            <span class="badge bg-primary rounded-pill">Completed</span>
+                                            break;
+                                        case ProjectStatus.Cancelled:
+                                            <span class="badge bg-danger rounded-pill">Cancelled</span>
+                                            break;
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Title & Description -->
+                            <h5 class="card-title fw-bold text-dark mb-2 text-truncate" title="@project.Title">
+                                <a asp-action="Details" asp-route-id="@project.Id" class="text-dark text-decoration-none hover-primary">
+                                    @project.Title
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                @(string.IsNullOrWhiteSpace(project.Description) ? "Chưa có mô tả chi tiết cho dự án này." : project.Description)
+                            </p>
+
+                            <!-- Progress Bar -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center small mb-1">
+                                    <span class="text-muted fw-semibold">Tiến độ</span>
+                                    <span class="fw-bold text-primary">@project.Progress%</span>
+                                </div>
+                                <div class="progress rounded-pill" style="height: 8px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated @(project.Progress == 100 ? "bg-success" : project.Progress > 50 ? "bg-primary" : "bg-warning")" 
+                                         role="progressbar" 
+                                         style="width: @project.Progress%" 
+                                         aria-valuenow="@project.Progress" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100"></div>
+                                </div>
+                            </div>
+
+                            <!-- Timeline & Manager Info -->
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top small text-muted mb-3">
+                                <div title="Thời gian thực hiện">
+                                    <i class="bi bi-calendar3 me-1 text-primary"></i>
+                                    @project.StartDate.ToString("dd/MM") - @project.EndDate.ToString("dd/MM/yyyy")
+                                </div>
+                                <div>
+                                    @if (isOverdue)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                                            <i class="bi bi-clock-history me-1"></i>Quá hạn @Math.Abs(daysRemaining) ngày
+                                        </span>
+                                    }
+                                    else if (project.Status == ProjectStatus.Completed)
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                                            <i class="bi bi-check2 me-1"></i>Hoàn tất
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-secondary border">
+                                            Còn @daysRemaining ngày
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Team & Actions Footer -->
+                            <div class="d-flex justify-content-between align-items-center pt-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 13px;" title="Manager: @(project.ManagerUser?.FullName ?? project.CreatedByUser?.FullName)">
+                                        @(project.ManagerUser?.FullName?.Substring(0, 1) ?? project.CreatedByUser?.FullName?.Substring(0, 1) ?? "M")
+                                    </div>
+                                    <span class="small text-muted fw-semibold">
+                                        @(project.ManagerUser?.FullName ?? project.CreatedByUser?.FullName ?? "Manager")
+                                    </span>
+                                    @if (project.ProjectMembers != null && project.ProjectMembers.Any())
+                                    {
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill" title="@project.ProjectMembers.Count thành viên">
+                                            +@project.ProjectMembers.Count <i class="bi bi-people-fill"></i>
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="btn-group">
+                                    <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-sm btn-outline-primary rounded-start-pill px-3" title="Chi tiết">
+                                        <i class="bi bi-eye"></i> Xem
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle dropdown-toggle-split rounded-end-pill px-2" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Thao tác</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                        <li>
+                                            <a class="dropdown-item" asp-action="Edit" asp-route-id="@project.Id">
+                                                <i class="bi bi-pencil me-2 text-warning"></i>Chỉnh sửa
+                                            </a>
+                                        </li>
+                                        @if (project.IsArchived)
+                                        {
+                                            <li>
+                                                <form asp-action="Unarchive" asp-route-id="@project.Id" method="post">
+                                                    <button type="submit" class="dropdown-item">
+                                                        <i class="bi bi-arrow-counterclockwise me-2 text-success"></i>Mở khóa lưu trữ
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li>
+                                                <form asp-action="Archive" asp-route-id="@project.Id" method="post">
+                                                    <button type="submit" class="dropdown-item">
+                                                        <i class="bi bi-archive me-2 text-secondary"></i>Lưu trữ (Archive)
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@project.Id">
+                                                <i class="bi bi-trash3 me-2"></i>Xóa dự án
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Confirm Modal -->
+                <div class="modal fade" id="deleteModal-@project.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Xác nhận xóa dự án</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                Bạn có chắc chắn muốn xóa dự án <strong>[@project.ProjectCode] @project.Title</strong> không?
+                                <div class="text-danger small mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>Hành động này sẽ xóa toàn bộ công việc, tài liệu và phân công thành viên liên quan.
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                                <form asp-action="Delete" asp-route-id="@project.Id" method="post">
+                                    <button type="submit" class="btn btn-danger rounded-pill px-4">Xác nhận Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+            <div class="card-body">
+                <div class="mb-3 text-muted">
+                    <i class="bi bi-folder-x" style="font-size: 3.5rem;"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Không tìm thấy dự án nào</h5>
+                <p class="text-muted">Chưa có dự án nào phù hợp với bộ lọc hiện tại hoặc bạn chưa được phân quyền quản lý dự án.</p>
+                <a asp-action="Create" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-plus-lg me-1"></i> Tạo Dự án Mới ngay
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.transition-hover {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.transition-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+}
+.hover-primary:hover {
+    color: #0d6efd !important;
+}
+</style>

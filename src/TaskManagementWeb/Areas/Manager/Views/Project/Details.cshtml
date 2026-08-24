@@ -1,0 +1,620 @@
+@using TaskManagementWeb.Models.Entities
+@using TaskManagementWeb.Models.Enums
+@model TaskManagementWeb.ViewModels.Manager.ProjectDetailsViewModel
+
+@{
+    ViewData["Title"] = $"Dự án: {Model.Project.Title}";
+    var project = Model.Project;
+}
+
+<div class="container-fluid px-4 py-3">
+    <!-- Breadcrumb & Top Bar -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Dự án</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">[@project.ProjectCode]</li>
+                </ol>
+            </nav>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <h2 class="fw-bold text-dark mb-0">@project.Title</h2>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-3">
+                    <i class="bi bi-hash"></i>@project.ProjectCode
+                </span>
+
+                <!-- Priority Badge -->
+                @switch (project.Priority)
+                {
+                    case ProjectPriority.Urgent:
+                        <span class="badge bg-danger rounded-pill"><i class="bi bi-fire me-1"></i>Khẩn cấp</span>
+                        break;
+                    case ProjectPriority.High:
+                        <span class="badge bg-warning text-dark rounded-pill">Ưu tiên Cao</span>
+                        break;
+                    case ProjectPriority.Medium:
+                        <span class="badge bg-info text-dark rounded-pill">Ưu tiên Trung bình</span>
+                        break;
+                    default:
+                        <span class="badge bg-secondary rounded-pill">Ưu tiên Thấp</span>
+                        break;
+                }
+
+                <!-- Status Badge -->
+                @switch (project.Status)
+                {
+                    case ProjectStatus.Active:
+                        <span class="badge bg-success rounded-pill">Đang thực hiện (Active)</span>
+                        break;
+                    case ProjectStatus.Planning:
+                        <span class="badge bg-info text-white rounded-pill">Lập kế hoạch (Planning)</span>
+                        break;
+                    case ProjectStatus.OnHold:
+                        <span class="badge bg-warning text-dark rounded-pill">Tạm dừng (On Hold)</span>
+                        break;
+                    case ProjectStatus.Completed:
+                        <span class="badge bg-primary rounded-pill">Đã hoàn thành</span>
+                        break;
+                    case ProjectStatus.Cancelled:
+                        <span class="badge bg-danger rounded-pill">Đã hủy</span>
+                        break;
+                }
+
+                @if (project.IsArchived)
+                {
+                    <span class="badge bg-secondary rounded-pill"><i class="bi bi-archive me-1"></i>Đã Lưu Trữ</span>
+                }
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-warning text-dark rounded-pill px-3 shadow-sm">
+                <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+            </a>
+
+            @if (project.IsArchived)
+            {
+                <form asp-action="Unarchive" asp-route-id="@project.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-success rounded-pill px-3">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Mở khóa lưu trữ
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form asp-action="Archive" asp-route-id="@project.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-secondary rounded-pill px-3">
+                        <i class="bi bi-archive me-1"></i> Lưu trữ (Archive)
+                    </button>
+                </form>
+            }
+
+            <button type="button" class="btn btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteProjectModal">
+                <i class="bi bi-trash3 me-1"></i> Xóa
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- KPI Summary Metrics Ribbon -->
+    <div class="row g-3 mb-4">
+        <!-- Progress Metric -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold small">Tiến Độ Dự Án</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold">@Model.ProgressPercentage%</span>
+                </div>
+                <div class="progress rounded-pill mb-2" style="height: 10px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated @(Model.ProgressPercentage == 100 ? "bg-success" : "bg-primary")" 
+                         role="progressbar" 
+                         style="width: @Model.ProgressPercentage%" 
+                         aria-valuenow="@Model.ProgressPercentage" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100"></div>
+                </div>
+                <span class="small text-muted">@Model.CompletedTasks / @Model.TotalTasks công việc hoàn tất</span>
+            </div>
+        </div>
+
+        <!-- Timeline Metric -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold small">Thời Hạn & Dòng Thời Gian</span>
+                    <i class="bi bi-clock-history text-primary fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark fs-5 mb-1">
+                    @if (Model.IsOverdue)
+                    {
+                        <span class="text-danger"><i class="bi bi-exclamation-octagon me-1"></i>Quá hạn @Math.Abs(Model.DaysRemaining) ngày</span>
+                    }
+                    else if (project.Status == ProjectStatus.Completed)
+                    {
+                        <span class="text-success"><i class="bi bi-check2-circle me-1"></i>Đúng tiến độ</span>
+                    }
+                    else
+                    {
+                        <span class="text-dark">Còn @Model.DaysRemaining ngày</span>
+                    }
+                </div>
+                <span class="small text-muted">@project.StartDate.ToString("dd/MM/yyyy") - @project.EndDate.ToString("dd/MM/yyyy")</span>
+            </div>
+        </div>
+
+        <!-- Tasks Counter -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold small">Công Việc (Tasks)</span>
+                    <i class="bi bi-check2-square text-success fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark fs-4 mb-1">@Model.TotalTasks <span class="fs-6 fw-normal text-muted">tasks</span></div>
+                <div class="d-flex gap-2 small">
+                    <span class="text-success">● @Model.CompletedTasks Xong</span>
+                    <span class="text-warning">● @Model.InProgressTasks Đang làm</span>
+                    <span class="text-secondary">● @Model.PendingTasks Chờ</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manager & Team Counter -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold small">Trưởng Dự Án & Nhân Lực</span>
+                    <i class="bi bi-people text-info fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark text-truncate mb-1" title="@(project.ManagerUser?.FullName ?? project.CreatedByUser?.FullName)">
+                    @(project.ManagerUser?.FullName ?? project.CreatedByUser?.FullName ?? "Chưa phân công")
+                </div>
+                <span class="small text-muted">@Model.ProjectMembers.Count thành viên tham gia</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+            <ul class="nav nav-tabs border-bottom-0 gap-2" id="projectTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-semibold rounded-top-3 px-4 py-3" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                        <i class="bi bi-info-circle me-2"></i>Tổng quan
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold rounded-top-3 px-4 py-3" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab">
+                        <i class="bi bi-list-task me-2"></i>Công việc <span class="badge bg-primary rounded-pill ms-1">@Model.TotalTasks</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold rounded-top-3 px-4 py-3" id="members-tab" data-bs-toggle="tab" data-bs-target="#members" type="button" role="tab">
+                        <i class="bi bi-people me-2"></i>Thành viên <span class="badge bg-secondary rounded-pill ms-1">@Model.ProjectMembers.Count</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold rounded-top-3 px-4 py-3" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab">
+                        <i class="bi bi-folder2-open me-2"></i>Tài liệu <span class="badge bg-light text-dark rounded-pill ms-1">@Model.ProjectFiles.Count</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold rounded-top-3 px-4 py-3" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
+                        <i class="bi bi-activity me-2"></i>Nhật ký hoạt động
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="tab-content" id="projectTabContent">
+                
+                <!-- TAB 1: OVERVIEW -->
+                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-lg-8">
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-card-text text-primary me-2"></i>Mô tả dự án</h5>
+                            <div class="p-4 bg-light rounded-4 mb-4 text-secondary leading-relaxed">
+                                @if (!string.IsNullOrWhiteSpace(project.Description))
+                                {
+                                    @Html.Raw(project.Description.Replace("\n", "<br/>"))
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Chưa có thông tin mô tả chi tiết cho dự án này.</span>
+                                }
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-calendar3-range text-primary me-2"></i>Dòng thời gian dự án (Timeline)</h5>
+                            <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                                <div class="d-flex justify-content-between text-muted small mb-2">
+                                    <span>Bắt đầu: <strong>@project.StartDate.ToString("dd/MM/yyyy")</strong></span>
+                                    <span>Hạn chót: <strong>@project.EndDate.ToString("dd/MM/yyyy")</strong></span>
+                                </div>
+                                <div class="progress rounded-pill mb-2" style="height: 12px;">
+                                    <div class="progress-bar progress-bar-striped @(Model.IsOverdue ? "bg-danger" : "bg-success")" style="width: @Model.ProgressPercentage%"></div>
+                                </div>
+                                <div class="text-center small text-muted">
+                                    Tiến độ tổng thể: <strong class="text-primary">@Model.ProgressPercentage%</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card border-0 bg-light rounded-4 p-4">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-square text-primary me-2"></i>Thuộc tính chi tiết</h6>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Trưởng dự án:</small>
+                                    <strong class="text-dark">@(project.ManagerUser?.FullName ?? project.CreatedByUser?.FullName ?? "Chưa chỉ định")</strong>
+                                    <div class="small text-muted">@(project.ManagerUser?.Email ?? project.CreatedByUser?.Email)</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Người tạo:</small>
+                                    <strong class="text-dark">@(project.CreatedByUser?.FullName ?? "System")</strong>
+                                    <div class="small text-muted">@project.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                </div>
+
+                                @if (project.UpdatedAt.HasValue)
+                                {
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block">Cập nhật lần cuối:</small>
+                                        <div class="small text-dark">@project.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                                    </div>
+                                }
+
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Trạng thái:</small>
+                                    <span class="fw-semibold text-primary">@project.Status</span>
+                                </div>
+
+                                <div>
+                                    <small class="text-muted d-block">Mức độ ưu tiên:</small>
+                                    <span class="fw-semibold text-danger">@project.Priority</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: TASKS -->
+                <div class="tab-pane fade" id="tasks" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-check2-circle text-primary me-2"></i>Danh sách Công việc</h5>
+                        <a asp-controller="Task" asp-action="Create" asp-route-projectId="@project.Id" class="btn btn-sm btn-primary rounded-pill px-3">
+                            <i class="bi bi-plus-lg me-1"></i> Thêm Task Mới
+                        </a>
+                    </div>
+
+                    @if (Model.Tasks != null && Model.Tasks.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Tiêu đề Công việc</th>
+                                        <th>Ưu tiên</th>
+                                        <th>Trạng thái</th>
+                                        <th>Người thực hiện</th>
+                                        <th>Hạn chót</th>
+                                        <th class="text-end pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var task in Model.Tasks)
+                                    {
+                                        <tr>
+                                            <td class="ps-3 fw-semibold text-dark">
+                                                <a asp-controller="Task" asp-action="Details" asp-route-id="@task.Id" class="text-dark text-decoration-none hover-primary">
+                                                    @task.Title
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark border">@task.Priority</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                                    @task.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="avatar-xs bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 11px;">
+                                                        @(task.AssignedUser?.FullName?.Substring(0, 1) ?? "?")
+                                                    </div>
+                                                    <span class="small">@(task.AssignedUser?.FullName ?? "Chưa phân công")</span>
+                                                </div>
+                                            </td>
+                                            <td class="small text-muted">@task.Deadline.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-end pe-3">
+                                                <a asp-controller="Task" asp-action="Details" asp-route-id="@task.Id" class="btn btn-sm btn-outline-primary rounded-pill px-2">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-controller="Task" asp-action="Edit" asp-route-id="@task.Id" class="btn btn-sm btn-outline-warning rounded-pill px-2">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted bg-light rounded-4">
+                            <i class="bi bi-clipboard-check fs-1 text-muted"></i>
+                            <p class="mt-2 mb-3">Dự án này chưa có công việc nào.</p>
+                            <a asp-controller="Task" asp-action="Create" asp-route-projectId="@project.Id" class="btn btn-sm btn-primary rounded-pill px-4">
+                                <i class="bi bi-plus-lg me-1"></i> Tạo Task Đầu Tiên
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                <!-- TAB 3: MEMBERS -->
+                <div class="tab-pane fade" id="members" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-people text-primary me-2"></i>Đội ngũ & Thành viên Dự án</h5>
+                            <small class="text-muted">Quản lý và phân công quyền hạn cho các nhân sự tham gia dự án.</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                            <i class="bi bi-person-plus me-1"></i> Thêm Thành Viên
+                        </button>
+                    </div>
+
+                    @if (Model.ProjectMembers != null && Model.ProjectMembers.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Nhân sự</th>
+                                        <th>Email</th>
+                                        <th>Vai trò trong dự án</th>
+                                        <th>Ngày tham gia</th>
+                                        <th class="text-end pe-3">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var member in Model.ProjectMembers)
+                                    {
+                                        <tr>
+                                            <td class="ps-3">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px; font-size: 13px;">
+                                                        @(member.User?.FullName?.Substring(0, 1) ?? "U")
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold text-dark">@member.User?.FullName</div>
+                                                        <small class="text-muted">@member.User?.Role?.RoleName</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted small">@member.User?.Email</td>
+                                            <td>
+                                                @if (member.RoleInProject == "Project Manager" || member.UserId == project.ManagerId)
+                                                {
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill">
+                                                        <i class="bi bi-star-fill me-1"></i>Project Manager
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-light text-dark border px-2 py-1 rounded-pill">
+                                                        @member.RoleInProject
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="text-muted small">@member.AssignedAt.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-end pe-3">
+                                                <form asp-action="RemoveMember" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa thành viên này khỏi dự án?');">
+                                                    <input type="hidden" name="projectId" value="@project.Id" />
+                                                    <input type="hidden" name="userId" value="@member.UserId" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" @(member.UserId == project.ManagerId ? "disabled title='Không thể xóa Trưởng dự án'" : "")>
+                                                        <i class="bi bi-person-x me-1"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted bg-light rounded-4">
+                            <i class="bi bi-people fs-1 text-muted"></i>
+                            <p class="mt-2 mb-3">Chưa có thành viên nào trong dự án.</p>
+                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                                <i class="bi bi-person-plus me-1"></i> Thêm thành viên ngay
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                <!-- TAB 4: FILES -->
+                <div class="tab-pane fade" id="files" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-folder2-open text-primary me-2"></i>Tài liệu & Đính kèm</h5>
+                    </div>
+
+                    <!-- Upload Form -->
+                    <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                        <form asp-action="UploadFile" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="projectId" value="@project.Id" />
+                            <label class="form-label fw-semibold text-dark">Tải lên tài liệu mới cho dự án</label>
+                            <div class="input-group">
+                                <input type="file" name="file" class="form-control" required />
+                                <button type="submit" class="btn btn-primary rounded-end px-4">
+                                    <i class="bi bi-cloud-arrow-up me-1"></i> Tải lên
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Files Table -->
+                    @if (Model.ProjectFiles != null && Model.ProjectFiles.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Tên Tập Tin</th>
+                                        <th>Kích Thước</th>
+                                        <th>Người Tải Lên</th>
+                                        <th>Thời Gian</th>
+                                        <th class="text-end pe-3">Tải Về</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var file in Model.ProjectFiles)
+                                    {
+                                        <tr>
+                                            <td class="ps-3 fw-semibold">
+                                                <i class="bi bi-file-earmark-text text-primary me-2"></i>@file.FileName
+                                            </td>
+                                            <td class="text-muted small">@((file.FileSize / 1024.0).ToString("N1")) KB</td>
+                                            <td class="small">@(file.UploadedByUser?.FullName ?? "Thành viên")</td>
+                                            <td class="text-muted small">@file.UploadedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td class="text-end pe-3">
+                                                <a href="@file.FilePath" target="_blank" download class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                    <i class="bi bi-download me-1"></i> Tải về
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4 bg-light rounded-4 mb-0">Chưa có tài liệu đính kèm nào được tải lên.</p>
+                    }
+                </div>
+
+                <!-- TAB 5: ACTIVITY LOG -->
+                <div class="tab-pane fade" id="activity" role="tabpanel">
+                    <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-clock-history text-primary me-2"></i>Nhật ký Hoạt động Dự án (Activity Log)</h5>
+                    
+                    @if (Model.AuditLogs != null && Model.AuditLogs.Any())
+                    {
+                        <div class="timeline p-3 bg-light rounded-4">
+                            @foreach (var log in Model.AuditLogs)
+                            {
+                                <div class="d-flex gap-3 mb-3 pb-3 border-bottom border-secondary border-opacity-10">
+                                    <div class="avatar-xs bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mt-1" style="width: 28px; height: 28px; font-size: 11px;">
+                                        <i class="bi bi-check-lg"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <strong class="text-dark small">@(log.User?.FullName ?? log.Action)</strong>
+                                            <small class="text-muted">@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </div>
+                                        <div class="text-secondary small mt-1">@log.Details</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4 bg-light rounded-4 mb-0">Chưa có lịch sử hoạt động được ghi nhận.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Member -->
+<div class="modal fade" id="addMemberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form asp-action="AddMember" method="post">
+                <input type="hidden" name="projectId" value="@project.Id" />
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-person-plus text-primary me-2"></i>Thêm thành viên vào dự án</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chọn nhân sự <span class="text-danger">*</span></label>
+                        <select name="userId" asp-items="Model.AvailableUsersToAdd" class="form-select" required>
+                            <option value="">-- Chọn nhân sự --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Vai trò trong dự án (Role)</label>
+                        <input type="text" name="role" class="form-control" placeholder="VD: Tech Lead, Developer, QA, UI Designer..." value="Member" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Thêm vào dự án</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Delete Project -->
+<div class="modal fade" id="deleteProjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Xác nhận xóa dự án</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                Bạn có chắc chắn muốn xóa dự án <strong>[@project.ProjectCode] @project.Title</strong> không?
+                <div class="text-danger small mt-2">
+                    <i class="bi bi-info-circle me-1"></i>Dữ liệu công việc, tài liệu và phân công liên quan sẽ bị xóa vĩnh viễn.
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                <form asp-action="Delete" asp-route-id="@project.Id" method="post">
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">Xác nhận Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-primary:hover {
+    color: #0d6efd !important;
+}
+.nav-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 3px solid transparent;
+}
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    background-color: transparent;
+    border-bottom: 3px solid #0d6efd;
+}
+</style>

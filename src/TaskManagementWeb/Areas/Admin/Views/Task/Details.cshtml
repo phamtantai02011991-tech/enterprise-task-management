@@ -1,0 +1,112 @@
+@using TaskManagementWeb.Models.Entities
+@using TaskManagementWeb.Models.Enums
+@model TaskItem
+
+@{
+    ViewData["Title"] = $"Giám sát Công việc - {Model.Title}";
+    ViewData["ActivePage"] = "Tasks";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-file-earmark-check text-primary me-2"></i>Chi Tiết Công Việc Toàn Doanh Nghiệp
+        </h2>
+        <p class="text-muted mb-0">Giám sát công việc, dự án chủ quản, tiến độ thực hiện và lịch sử ghi nhận thời lượng.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge @(Model.Status == TaskStatusEnum.Completed ? "bg-success" : Model.Status == TaskStatusEnum.InProgress ? "bg-primary" : "bg-secondary") rounded-pill px-3 py-1">
+                        @Model.Status
+                    </span>
+                    <span class="badge bg-light text-dark border rounded-pill px-3 py-1">
+                        Ưu tiên: @Model.Priority
+                    </span>
+                </div>
+
+                <h3 class="fw-bold text-dark mb-3">@Model.Title</h3>
+
+                <div class="p-4 bg-light rounded-4 text-secondary leading-relaxed mb-4">
+                    @(string.IsNullOrWhiteSpace(Model.Description) ? "Không có mô tả chi tiết cho công việc này." : Model.Description)
+                </div>
+
+                <h5 class="fw-bold text-dark mb-3">Lịch Sử Ghi Nhận Giờ Làm (Time Logs)</h5>
+                @if (Model.TimeLogs != null && Model.TimeLogs.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nhân Sự</th>
+                                    <th>Số Giờ Làm</th>
+                                    <th>Ngày Ghi Nhận</th>
+                                    <th>Ghi Chú Công Việc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tl in Model.TimeLogs)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@tl.User?.FullName</td>
+                                        <td><span class="badge bg-primary rounded-pill">@tl.HoursSpent giờ</span></td>
+                                        <td class="small text-muted">@tl.DateLogged.ToString("dd/MM/yyyy")</td>
+                                        <td class="small text-secondary">@tl.Description</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small">Chưa có nhật ký thời gian nào được ghi nhận cho công việc này.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Project Context -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-folder-fill text-primary me-2"></i>Dự Án Chủ Quản</h6>
+            <div class="p-3 bg-light rounded-3">
+                <div class="small font-monospace text-primary fw-bold">@Model.Project?.ProjectCode</div>
+                <div class="fw-bold text-dark mt-1">@Model.Project?.Title</div>
+                <small class="text-muted d-block mt-2">Trưởng dự án: @(Model.Project?.ManagerUser?.FullName ?? "Chưa chỉ định")</small>
+                <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.ProjectId" class="btn btn-sm btn-outline-primary rounded-pill mt-3 w-100">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Xem Dự Án
+                </a>
+            </div>
+        </div>
+
+        <!-- Assigned User -->
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-fill text-success me-2"></i>Nhân Sự Phụ Trách</h6>
+            @if (Model.AssignedUser != null)
+            {
+                <div class="p-3 bg-light rounded-3">
+                    <div class="fw-bold text-dark">@Model.AssignedUser.FullName</div>
+                    <small class="text-muted d-block">@Model.AssignedUser.Email</small>
+                </div>
+            }
+            else
+            {
+                <span class="badge bg-warning text-dark rounded-pill">Chưa phân công</span>
+            }
+
+            <hr class="my-3" />
+            <div class="small text-muted">
+                <div><i class="bi bi-calendar-event me-2"></i>Hạn chót: <strong>@Model.Deadline.ToString("dd/MM/yyyy")</strong></div>
+            </div>
+        </div>
+    </div>
+</div>
