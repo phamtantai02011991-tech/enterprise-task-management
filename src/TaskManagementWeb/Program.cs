@@ -58,17 +58,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-app.MapStaticAssets();
+app.UseStaticFiles();
 
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    ;
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}")
-    .WithStaticAssets();
+    ;
 
 using (var scope = app.Services.CreateScope())
 {
