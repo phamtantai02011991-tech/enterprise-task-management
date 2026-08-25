@@ -6,6 +6,6 @@ RUN dotnet publish src/TaskManagementWeb/TaskManagementWeb.csproj -c Release -o 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /out .
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080 80 10000
+ENV ASPNETCORE_URLS=http://+:8080;http://+:80;http://+:10000
 ENTRYPOINT ["dotnet", "TaskManagementWeb.dll"]
