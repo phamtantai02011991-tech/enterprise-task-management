@@ -7,10 +7,18 @@ using TaskManagementWeb.Services.Manager;
 var builder = WebApplication.CreateBuilder(args);
 
 //dang ki dbContext
+var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
+{
+    if (string.IsNullOrEmpty(defaultConn) || defaultConn.Contains("Server=.") || defaultConn.Contains("Trusted_Connection"))
+    {
+        options.UseSqlite("Data Source=taskmanagement.db");
+    }
+    else
+    {
+        options.UseSqlServer(defaultConn);
+    }
+});
    
 builder.Services.AddAuthentication(options =>
 {

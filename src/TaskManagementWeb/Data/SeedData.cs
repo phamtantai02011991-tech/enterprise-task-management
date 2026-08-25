@@ -14,7 +14,7 @@ namespace TaskManagementWeb.Data
     {
         public static async Task SeedAsync(ApplicationDbContext context)
         {
-            await context.Database.MigrateAsync();
+            await context.Database.EnsureCreatedAsync();
 
 
             // 1. Seed Roles
